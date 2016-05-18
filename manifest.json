@@ -1,0 +1,35 @@
+{
+	"manifest_version": 3,
+
+	"name": "Prototypo web preview",
+	"description": "This extension allows you to use and synchronize font you create with Prototypo directly on your web site",
+	"version": "1.2",
+
+	"browser_action": {
+		"default_icon": "p-menu.png"
+	},
+	"icons": {
+		"16": "p-menu-16.png",
+		"48": "p-menu-48.png",
+		"128": "p-menu-128.png"
+	},
+	"content_scripts": [{
+		"js": ["optimal-select.js","contentScript.js"],
+		"matches": ["*://*/*"],
+		"css": ["prototypo.css"]
+	}],
+	"background": {
+		"scripts": ["background.js"]
+	},
+	"permissions": [
+		"tabs",
+		"https://*/",
+		"http://*/"
+	],
+	"web_accessible_resources": [
+		"http://localhost:9000/iframe.html",
+		"delete.svg",
+		"selector.svg",
+		"selector-hover-active.svg"
+	]
+}
