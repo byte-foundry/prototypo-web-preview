@@ -33,6 +33,8 @@ function sendHighlightParentQuery() {
 	// console.log('must send an query for highlightParent function');
 }
 function sendChooseElQuery() {
+	var port = chrome.extension.connect({name: "Popup Communication"});
+  port.postMessage("Hi popup");
 	// forcer ouverture popup ?
 	// console.log('must send an query for chooseEl function');
 }

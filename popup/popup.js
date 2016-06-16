@@ -239,6 +239,11 @@ var SelectorInput = function() {
 	}
 
 	this.selectionMode.addEventListener('click', selectionProcess.bind(this));
+  // here we listen to incomming message from contentScript
+  var port = chrome.extension.connect({name: "Popup Communication"});
+  port.onMessage.addListener(function(msg) {
+    console.log("message recieved : " + msg);
+  });
 
 	function selectionProcess() {
       var selection = !this.selectionModeState;
