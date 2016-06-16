@@ -26,7 +26,7 @@ FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
 	if (Object.keys(this.list).length === 1) {
 		document.querySelector('.prototypo-magic-font-list-container').classList.add('scale-in');
 	}
-	
+
 	this.el.classList.remove('hidden');
 };
 
@@ -205,7 +205,7 @@ var SelectorInput = function() {
 		}
 	}
 
-	this.selectionMode.addEventListener('click', function(e) {
+	/*this.selectionMode.addEventListener('click', function(e) {
 		this.selectionModeState = !this.selectionModeState;
 		this.selectionMode.classList.toggle('is-active');
 
@@ -227,7 +227,34 @@ var SelectorInput = function() {
 				self.elementHighlighted = undefined;
 			}
 		}
-	}.bind(this));
+	}.bind(this));*/
+
+	this.selectionMode.addEventListener('click', selectionProcess.bind(this));
+
+	function selectionProcess() {
+
+			this.selectionModeState = !this.selectionModeState;
+			this.selectionMode.classList.toggle('is-active');
+
+			if (this.selectionModeState) {
+				Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+					el.addEventListener('mouseenter', highlightEl);
+					el.addEventListener('mouseleave', highlightParent);
+					el.addEventListener('click', chooseEl);
+				});
+			}
+			else {
+				Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+					el.removeEventListener('mouseenter', highlightEl);
+					el.removeEventListener('mouseleave', highlightParent);
+					el.removeEventListener('click', chooseEl);
+				});
+				if (self.elementHighlighted) {
+					self.elementHighlighted.style.outline = 'none';
+					self.elementHighlighted = undefined;
+				}
+			}
+	}
 
 	this.elementAffected = [];
 
@@ -235,7 +262,7 @@ var SelectorInput = function() {
 		Array.prototype.forEach.call(self.elementAffected, function(el) {
 			el.classList.remove('prototypo-selected');
 		});
-		
+
 		self.elementAffected = document.querySelectorAll(selector);
 		Array.prototype.forEach.call(self.elementAffected, function(el) {
 			el.classList.add('prototypo-selected');

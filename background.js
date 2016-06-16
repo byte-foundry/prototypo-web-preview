@@ -5,6 +5,9 @@ chrome.browserAction.setIcon({ path: 'p-menu.svg' });
 
 chrome.browserAction.onClicked.addListener(function(e) {
 
+	// adding a popup
+	chrome.browserAction.setPopup({popup: "popup/popup.html"});
+
 	chrome.tabs.sendMessage(e.id, {activate: true}, function(response) {
 		chrome.browserAction.setIcon({
 			path: 'p-menu' + response.iconState + '.svg',
