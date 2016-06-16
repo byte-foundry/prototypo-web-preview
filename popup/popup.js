@@ -129,8 +129,8 @@ var FontSelectorLink = function(selector, fontname, parent) {
   this.selectorDelete = document.querySelector('.prototypo-list-selector-delete');
 	this.selectorDelete.style.backgroundImage = 'url(\'' + chrome.extension.getURL('delete.svg') + '\')';
 
-	this.selectorContainer.appendChild(this.selectorName);
-	this.selectorContainer.appendChild(this.selectorDelete);
+	// this.selectorContainer.appendChild(this.selectorName);
+	// this.selectorContainer.appendChild(this.selectorDelete);
 
   this.fontNameContainer = document.querySelector('.prototypo-list-fontname-container')
 	this.fontNameContainer.innerText = fontname;
@@ -169,10 +169,10 @@ var PrototypoMagic = function(fonts) {
   this.container = document.querySelector('.prototypo-magic-container')
 
 	this.selectorInput = new SelectorInput();
-	this.container.appendChild(this.selectorInput.el);
+	// this.container.appendChild(this.selectorInput.el);
 
 	this.fontSelect = new FontSelect(fonts);
-	this.container.appendChild(this.fontSelect.el);
+	// this.container.appendChild(this.fontSelect.el);
 
   this.validFont = document.querySelector('.prototypo-magic-apply');
 	this.validFont.addEventListener('click', function(e) {
