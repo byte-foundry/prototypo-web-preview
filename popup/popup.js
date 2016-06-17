@@ -164,9 +164,9 @@ var PrototypoMagic = function(fonts) {
 
   this.el = document.querySelector('.prototypo-magic');
 
-  this.listContainer = document.querySelector('.prototypo-magic-font-list-container')
+  this.listContainer = document.querySelector('.prototypo-magic-font-list-container');
 
-  this.container = document.querySelector('.prototypo-magic-container')
+  this.container = document.querySelector('.prototypo-magic-container');
 
 	this.selectorInput = new SelectorInput();
 	// this.container.appendChild(this.selectorInput.el);
@@ -205,7 +205,9 @@ var SelectorInput = function() {
 	this.selectionModeState = false;
 
 	this.elementHighlighted = undefined;
+
 	var self = this;
+
 	function highlightEl(e) {
 		if (self.elementHighlighted) {
 			self.elementHighlighted.style.outline = 'none';
@@ -240,10 +242,12 @@ var SelectorInput = function() {
 
 	this.selectionMode.addEventListener('click', selectionProcess.bind(this));
   // here we listen to incomming message from contentScript
+  /* useless a priori vu qu'on ne peut pas envoyer de message depuis le content si la popup est fermee
   var port = chrome.extension.connect({name: "Popup Communication"});
   port.onMessage.addListener(function(msg) {
     console.log("message recieved : " + msg);
   });
+  */
 
 	function selectionProcess() {
       var selection = !this.selectionModeState;
@@ -265,27 +269,6 @@ var SelectorInput = function() {
           }
         );
       });
-      /**
-      * envoyer un message avec object contenant this et self a priori
-      *
-			if (this.selectionModeState) {
-				Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
-					el.addEventListener('mouseenter', highlightEl);
-					el.addEventListener('mouseleave', highlightParent);
-					el.addEventListener('click', chooseEl);
-				});
-			} else {
-				Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
-					el.removeEventListener('mouseenter', highlightEl);
-					el.removeEventListener('mouseleave', highlightParent);
-					el.removeEventListener('click', chooseEl);
-				});
-				if (self.elementHighlighted) {
-					self.elementHighlighted.style.outline = 'none';
-					self.elementHighlighted = undefined;
-				}
-			}
-      */
 	}
 
 	this.elementAffected = [];
@@ -295,7 +278,6 @@ var SelectorInput = function() {
 			el.classList.remove('prototypo-selected');
 		});
 
-    // envoyer un message
 		self.elementAffected = document.querySelectorAll(selector);
 		Array.prototype.forEach.call(self.elementAffected, function(el) {
 			el.classList.add('prototypo-selected');
