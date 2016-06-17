@@ -2,12 +2,17 @@ var iframeDomain = 'http://localhost:9000/';
 var animationDuration = 200;
 var iframe;
 var error;
+// available fonts from prototypo
 var fonts;
+// variable to store current selected font sent from popup
+var selectedFont = "";
+
+chrome.storage.local.clear();
 
 /* setting up the iframe containing protypo app */
 var extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
 if (!location.ancestorOrigins.contains(extensionOrigin)) {
-	
+
 	var iframe = document.createElement('iframe');
 	// Must be declared at web_accessible_resources in manifest.json
 	iframe.src = iframeDomain + 'iframe.html';
@@ -24,13 +29,12 @@ window.addEventListener('unload', function() {
 });
 
 
-// variable to store current selected font sent from popup
-var selectedFont = "";
-
 // on element selection start
-window.addEventListener("selection_start", function(e){
-	console.log(e.detail);
+window.addEventListener("selection_start", function(e) {
+	// here we store the font that was selected in the popup
 	selectedFont = e.detail.font;
+	storeSelectedFont(selectedFont);
+
 	if (e.detail.selection) {
 		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
 			el.addEventListener('mouseenter', highlightEl);
@@ -95,7 +99,7 @@ function chooseEl(e) {
 		self.selectionMode.classList.remove('is-active');
 		selectElements(selector);
 		*/
-		sendChooseElQuery(selector);
+		storeElement(selector);
 
 		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
 			el.removeEventListener('mouseenter', highlightEl);
@@ -125,25 +129,18 @@ function chooseEl(e) {
 		} else {
 			styleEl.appendChild(document.createTextNode(style));
 		}
-		console.log(styleEl);
 		document.head.appendChild(styleEl);
 	}
 }
 
 /* communication functions - sent to the popup */
 
-function sendChooseElQuery(element) {
-	/*chrome.storage.local.set({selectedElement: element});
-	// here send the query to popup
-	chrome.storage.local.get("selectedElement", function(data) {
-    if(typeof data.selectedElement == "undefined") {
-        throw new Error("Error while retrieving local storage");
-    } else {
-        console.log(data.selectedElement);
-    }
-	});*/
+function storeElement(selector) {
+	chrome.storage.local.set({selectedElement: selector});
 }
-
+function storeSelectedFont(selectedFont) {
+	chrome.storage.local.set({selectedFont: selectedFont});
+}
 /* listening to protypo app worker messages */
 window.addEventListener('message', function(e) {
 	if (!iframe) {

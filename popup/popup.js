@@ -1,3 +1,6 @@
+var previouslySelectedElement = "";
+var previouslySelectedFont = "";
+
 // on popup load
 window.addEventListener("load", function() {
   // retrieve fonts loaded by content script
@@ -21,6 +24,22 @@ window.addEventListener("load", function() {
       }
     );
   });
+
+  // retrieve previously selected element
+	chrome.storage.local.get("selectedElement", function(data) {
+      if(data){
+        if(data.selectedElement){
+            previouslySelectedElement = data.selectedElement;
+        }
+      }
+  });
+	chrome.storage.local.get("selectedFont", function(data) {
+      if(data){
+        if(data.selectedFont){ console.log(selectedFont);
+            previouslySelectedFont = data.selectedFont;
+        }
+      }
+  });
 });
 
 /* FontSelectorList */
@@ -33,9 +52,6 @@ var FontSelectorList = function() {
 FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
 	var item = new FontSelectorLink(selector, fontname, this);
 	this.el.appendChild(item.el);
-
-  // envoyer un message, vérifier qu'il n'agit que sur le bon tab
-	// document.head.appendChild(item.styleEl);
 
 	this.list[selector] = item;
 
@@ -164,6 +180,9 @@ var SelectorInput = function() {
   this.el = document.querySelector('.prototypo-magic-selector')
 
   this.input = document.querySelector('.prototypo-magic-selector-input');
+  if (previouslySelectedElement !== "") {
+    this.input.value = previouslySelectedElement;
+  }
 
   this.selectionMode = document.querySelector('.prototypo-magic-selection-mode');
 
@@ -280,6 +299,17 @@ var FontSelect = function(fonts) {
 
 		}.bind(this));
 	}.bind(this));
+
+  // select previously selected font if necessary
+  if (previouslySelectedFont !== ""){
+    console.log(previouslySelectedFont);
+    var options = document.querySelectorAll('.prototypo-magic-select option');
+    Array.prototype.forEach.call(options,function(option){
+      if (option.value === previouslySelectedFont){
+        option.selected = true;
+      }
+    });
+  }
 }
 
 /* PrototypoError */

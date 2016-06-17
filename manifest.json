@@ -24,7 +24,8 @@
 	"permissions": [
 		"tabs",
 		"https://*/",
-		"http://*/"
+		"http://*/",
+		"storage"
 	],
 	"web_accessible_resources": [
 		"http://localhost:9000/iframe.html",
