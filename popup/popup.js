@@ -1,34 +1,26 @@
+// on popup load
 window.addEventListener("load", function() {
-  var port = chrome.extension.connect({name: "Popup Communication"});
-  port.postMessage("popup_loaded");
-  port.onMessage.addListener(function(msg) {
-    console.log("message recieved : " + msg);
+  // retrieve fonts loaded by content script
+  chrome.tabs.getSelected(null, function(tab) {
+    chrome.tabs.sendRequest(
+      tab.id,
+      {
+        action: "get_libraries"
+      },
+      function(fonts) {
+  			var prototypoButton = new PrototypoMagic(fonts.values);
+  			document.body.appendChild(prototypoButton.el);
+  			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  				prototypoButton.container.classList.toggle('hidden');
+  				prototypoButton.active = !prototypoButton.active;
+  				sendResponse({
+  					isActive: prototypoButton.active,
+  					iconState: prototypoButton.active ? '-hover-active' : ''
+  				});
+  			}.bind(this));
+      }
+    );
   });
-});
-
-/**
-* we are going to do the popup front-end work here
-*/
-var iframeDomain = 'http://localhost:9000/';
-var animationDuration = 200;
-var iframe;
-var error;
-
-var extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
-if (!location.ancestorOrigins.contains(extensionOrigin)) {
-	var iframe = document.createElement('iframe');
-	// Must be declared at web_accessible_resources in manifest.json
-	iframe.src = iframeDomain + 'iframe.html';
-
-	// Some styles for a fancy sidebar
-	iframe.style.cssText = 'position:fixed;top:0;left:0;display:block;' +
-	'width:0px;height:0px;';
-	document.body.appendChild(iframe);
-}
-
-//Here we send a message to the iframe to close the worker port
-window.addEventListener('unload', function() {
-	iframe.post({type: 'close'}, iframeDomain);
 });
 
 /* FontSelectorList */
@@ -44,14 +36,6 @@ FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
 
   // envoyer un message, vérifier qu'il n'agit que sur le bon tab
 	// document.head.appendChild(item.styleEl);
-
-	if (iframe) {
-		var textInSelected = '';
-		Array.prototype.forEach.call(document.querySelectorAll(selector), function(el) {
-			textInSelected += el.innerText;
-		});
-		iframe.contentWindow.postMessage({type: 'subset', data: textInSelected, add: true},iframeDomain);
-	}
 
 	this.list[selector] = item;
 
@@ -104,20 +88,6 @@ var FontSelectorLink = function(selector, fontname, parent) {
 	this.selector = selector;
 	this.list = parent;
 
-  /*
-  * envoyer un message
-  *
-	this.styleEl = document.createElement('style');
-	var style = selector + ' { font-family: ' + fontname + ' !important;transition: background .2s ease, color .2s ease;}';
-
-	if (this.styleEl.stylesheet) {
-		this.styleEl.stylesheet.cssText = style;
-	}
-	else {
-		this.styleEl.appendChild(document.createTextNode(style));
-	}
-  */
-
 	this.el = document.createElement('li');
 	this.el.classList.add('height-in');
 
@@ -128,9 +98,6 @@ var FontSelectorLink = function(selector, fontname, parent) {
 
   this.selectorDelete = document.querySelector('.prototypo-list-selector-delete');
 	this.selectorDelete.style.backgroundImage = 'url(\'' + chrome.extension.getURL('delete.svg') + '\')';
-
-	// this.selectorContainer.appendChild(this.selectorName);
-	// this.selectorContainer.appendChild(this.selectorDelete);
 
   this.fontNameContainer = document.querySelector('.prototypo-list-fontname-container')
 	this.fontNameContainer.innerText = fontname;
@@ -169,10 +136,8 @@ var PrototypoMagic = function(fonts) {
   this.container = document.querySelector('.prototypo-magic-container');
 
 	this.selectorInput = new SelectorInput();
-	// this.container.appendChild(this.selectorInput.el);
 
 	this.fontSelect = new FontSelect(fonts);
-	// this.container.appendChild(this.fontSelect.el);
 
   this.validFont = document.querySelector('.prototypo-magic-apply');
 	this.validFont.addEventListener('click', function(e) {
@@ -241,16 +206,11 @@ var SelectorInput = function() {
 	}
 
 	this.selectionMode.addEventListener('click', selectionProcess.bind(this));
-  // here we listen to incomming message from contentScript
-  /* useless a priori vu qu'on ne peut pas envoyer de message depuis le content si la popup est fermee
-  var port = chrome.extension.connect({name: "Popup Communication"});
-  port.onMessage.addListener(function(msg) {
-    console.log("message recieved : " + msg);
-  });
-  */
 
 	function selectionProcess() {
       var selection = !this.selectionModeState;
+      var selectedFont = document.querySelector('.prototypo-magic-select').value;
+
 			this.selectionModeState = !this.selectionModeState;
 			this.selectionMode.classList.toggle('is-active');
 
@@ -262,7 +222,8 @@ var SelectorInput = function() {
           {
             action: "start_selection",
             selection: selection,
-            self: self
+            self: self,
+            font: selectedFont
           },
           function(response) {
             console.log(response);
@@ -321,51 +282,10 @@ var FontSelect = function(fonts) {
 	}.bind(this));
 }
 
-
-// pas trop sûr
+/* PrototypoError */
 
 var PrototypoError = function(message) {
 	this.el = document.createElement('div');
 	this.el.classList.add('prototypo-magic-error');
 	this.el.innerText = message;
 }
-
-window.addEventListener('message', function(e) {
-	if (!iframe) {
-		iframe = e.source.parent.iframe;
-	}
-
-	if (error) {
-		document.body.removeChild(error.el);
-	}
-
-	switch(e.data.type) {
-		case 'font':
-      // envoyer un message
-			document.fonts.add(new FontFace(e.data.font[1], e.data.font[0]));
-			break;
-		case 'library':
-			var fonts = e.data;
-			var prototypoButton = new PrototypoMagic(fonts.values);
-			document.body.appendChild(prototypoButton.el);
-			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-				prototypoButton.container.classList.toggle('hidden');
-				prototypoButton.active = !prototypoButton.active;
-				sendResponse({
-					isActive: prototypoButton.active,
-					iconState: prototypoButton.active ? '-hover-active' : ''
-				});
-			}.bind(this));
-			break;
-		case 'error':
-			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-				var prototypoError = error = new PrototypoError(e.data.message);
-				document.body.appendChild(prototypoError.el);
-				sendResponse({
-					isActive: false,
-					iconState: ''
-				});
-			}.bind(this));
-			break;
-	}
-}, false);
