@@ -88,7 +88,22 @@ window.addEventListener("select_elements", function(e) {
 		});
 });
 
-// listening to protypo app worker messages
+// listening to highlight
+window.addEventListener("highlight_selection", function(e) {
+	var items = document.querySelectorAll(e.detail.message.selector);
+	Array.prototype.forEach.call(items, function(item) {
+		item.classList.add('prototypo-highlight');
+	});
+});
+// listening to unhighlight
+window.addEventListener("unhighlight_selection", function(e) {
+	var items = document.querySelectorAll(e.detail.message.selector);
+	Array.prototype.forEach.call(items, function(item) {
+		item.classList.remove('prototypo-highlight');
+	});
+});
+
+// listening to Prototypo app worker messages
 window.addEventListener('message', function(e) {
 	if (!iframe) {
 		iframe = e.source.parent.iframe;
@@ -163,7 +178,6 @@ function chooseEl(e) {
 
 		var selector = OptimalSelect.select(e.target);
 		/* envoyer message pour mettre à jour la popup
-		self.input.value = selector;
 		self.selectionModeState = false;
 		self.selectionMode.classList.remove('is-active');
 		selectElements(selector);
@@ -207,7 +221,16 @@ function chooseEl(e) {
 * @param {string} selector - concerned selector stored as a string
 */
 function storeElement(selector) {
-	chrome.storage.local.set({selectedElement: selector});
+	chrome.storage.local.get("selectedElements", function(data) {
+		if (data) {
+			if (data.selectedElements) {
+				data.selectedElements.push({ selector: selector, font: selectedFont });
+				chrome.storage.local.set({ selectedElements: data.selectedElements });
+			} else {
+				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: selectedFont }] });
+			}
+		}
+	});
 }
 
 /**

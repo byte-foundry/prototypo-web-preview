@@ -2,7 +2,6 @@
 * Handle request comming from popup window
 * data sent via "sendRequest" method in popup.js
 */
-
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   switch (request.action) {
     // start of selection process
@@ -17,9 +16,17 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "apply_style":
       applyStyle(request);
       break;
-    // apply selected font to sent element
+    // select elements
     case "select_elements":
       selectElements(request);
+      break;
+    // highlight selection
+    case "highlight_selection":
+      highlightSelection(request);
+      break;
+    // highlight selection
+    case "unhighlight_selection":
+      unHighlightSelection(request);
       break;
     default:
       sendResponse("default_response from content");
@@ -52,4 +59,22 @@ function applyStyle(request) {
 function selectElements(request) {
   var selectElements = new CustomEvent('select_elements',{'detail' : request});
   window.dispatchEvent(selectElements);
+}
+
+/**
+* Emmit an event in order to highlight elements
+* @param {object} request - the request sent by the popup
+*/
+function highlightSelection(request) {
+  var highlightSelection = new CustomEvent('highlight_selection',{'detail' : request});
+  window.dispatchEvent(highlightSelection);
+}
+
+/**
+* Emmit an event in order to end elements highlighting
+* @param {object} request - the request sent by the popup
+*/
+function unHighlightSelection(request) {
+  var unHighlightSelection = new CustomEvent('unhighlight_selection',{'detail' : request});
+  window.dispatchEvent(unHighlightSelection);
 }

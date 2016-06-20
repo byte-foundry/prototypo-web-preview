@@ -1,4 +1,4 @@
-var previouslySelectedElement = "";
+var previouslySelectedElements = [];
 var previouslySelectedFont = "";
 
 // on popup load
@@ -27,10 +27,10 @@ window.addEventListener("load", function() {
   });
 
   // retrieve previously selected element
-	chrome.storage.local.get("selectedElement", function(data) {
+	chrome.storage.local.get("selectedElements", function(data) {
       if (data) {
-        if (data.selectedElement) {
-          previouslySelectedElement = data.selectedElement;
+        if (data.selectedElements) {
+          previouslySelectedElements = data.selectedElements;
         }
       }
   });
@@ -44,13 +44,23 @@ window.addEventListener("load", function() {
   });
 });
 
-/* FontSelectorList */
-
+/**
+* Font selector
+*/
 var FontSelectorList = function() {
+  var self = this;
   this.el = document.querySelector(".prototypo-font-selector-list")
 	this.list = {};
+  previouslySelectedElements.forEach(function(element) {
+    self.addFontSelector(element.selector, element.font);
+  });
 };
 
+/**
+* Add a new font selector
+* @param {string} selector
+* @param {string} fontname
+*/
 FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
 	var item = new FontSelectorLink(selector, fontname, this);
 	this.el.appendChild(item.el);
@@ -64,6 +74,10 @@ FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
 	this.el.classList.remove('hidden');
 };
 
+/**
+* Remove a font selector
+* @param {string} selector
+*/
 FontSelectorList.prototype.remove = function(selector) {
 	var item = this.list[selector];
 	delete this.list[selector];
@@ -74,14 +88,14 @@ FontSelectorList.prototype.remove = function(selector) {
 				this.el.classList.add('hidden');
 				document.querySelector('.prototypo-magic-font-list-container').classList.remove('scale-out');
 				this.el.removeChild(item.el);
+
         // envoyer un message
 				// document.head.removeChild(item.styleEl);
+
 				document.querySelector('.prototypo-magic-font-list-container').removeEventListener('animationend', endHandler);
-        // envoyer un message ?
-				var items = document.querySelectorAll(selector);
-				Array.prototype.forEach.call(items, function(item) {
-					item.classList.remove('prototypo-highlight');
-				});
+        sendMessageToContent("unhighlight_selection", {
+          selector: selector
+        });
 		}.bind(this);
 		document.querySelector('.prototypo-magic-font-list-container').addEventListener('animationend', endHandler);
 	} else {
@@ -89,19 +103,23 @@ FontSelectorList.prototype.remove = function(selector) {
 		item.el.classList.add('height-out');
 		item.el.addEventListener('animationend', function() {
 			this.el.removeChild(item.el);
+
       // envoyer un message
 			// document.head.removeChild(item.styleEl);
-      // envoyer un message ?
-			var items = document.querySelectorAll(selector);
-			Array.prototype.forEach.call(items, function(item) {
-				item.classList.remove('prototypo-highlight');
-			});
+
+      sendMessageToContent("unhighlight_selection", {
+        selector: selector
+      });
 		}.bind(this));
 	}
 }
 
-/* FontSelectorLink */
-
+/**
+* FontSelectorLink
+* @param {string} selector
+* @param {string} fontname
+* @param {string} parent
+*/
 var FontSelectorLink = function(selector, fontname, parent) {
 	this.selector = selector;
 	this.list = parent;
@@ -109,41 +127,48 @@ var FontSelectorLink = function(selector, fontname, parent) {
 	this.el = document.createElement('li');
 	this.el.classList.add('height-in');
 
-  this.selectorContainer = document.querySelector('.prototypo-list-selector-container');
+	this.selectorContainer = document.createElement('div');
+	this.selectorContainer.classList.add('prototypo-list-selector-container');
 
-  this.selectorName = document.querySelector('.prototypo-list-selector-name');
+	this.selectorName = document.createElement('div');
+	this.selectorName.classList.add('prototypo-list-selector-name');
 	this.selectorName.innerText = selector;
 
-  this.selectorDelete = document.querySelector('.prototypo-list-selector-delete');
+	this.selectorDelete = document.createElement('div');
+	this.selectorDelete.classList.add('prototypo-list-selector-delete');
 	this.selectorDelete.style.backgroundImage = 'url(\'' + chrome.extension.getURL('delete.svg') + '\')';
 
-  this.fontNameContainer = document.querySelector('.prototypo-list-fontname-container')
+  this.fontNameContainer = document.createElement('div');
+	this.fontNameContainer.classList.add('prototypo-list-fontname-container');
 	this.fontNameContainer.innerText = fontname;
 
+  this.selectorContainer.appendChild(this.selectorName);
+	this.selectorContainer.appendChild(this.selectorDelete);
 	this.el.appendChild(this.selectorContainer);
 	this.el.appendChild(this.fontNameContainer);
 
 	this.el.addEventListener('mouseenter', function() {
-		var items = document.querySelectorAll(selector);
-		Array.prototype.forEach.call(items, function(item) {
-			item.classList.add('prototypo-highlight');
-		});
+    sendMessageToContent("highlight_selection", {
+      selector: selector
+    });
 	});
 
 	this.el.addEventListener('mouseleave', function() {
-		var items = document.querySelectorAll(selector);
-		Array.prototype.forEach.call(items, function(item) {
-			item.classList.remove('prototypo-highlight');
-		});
+    sendMessageToContent("unhighlight_selection", {
+      selector: selector
+    });
 	});
 
 	this.selectorDelete.addEventListener('click', function(e) {
 		this.list.remove(this.selector);
+    removeStoredElement(this.selector);
 	}.bind(this));
 };
 
-/* PrototypoMagic */
-
+/**
+* PrototypoMagic
+* @param {array} fonts - fonts from Prototypo
+*/
 var PrototypoMagic = function(fonts) {
 	this.active = false;
 
@@ -162,20 +187,18 @@ var PrototypoMagic = function(fonts) {
 		if (this.selectorInput.input.value) {
 			e.stopPropagation();
 			this.selectorInput.input.classList.remove('in-error');
-      // send message to content
-			// this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
-      try{
+      try {
         document.querySelector(this.selectorInput.input.value);
-      } catch (e) {
-        console.log("e");
+        sendMessageToContent("apply_style", {
+          selector: this.selectorInput.input.value,
+          selectedFont : this.fontSelect.el.value
+        });
+        this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
+        storeElement(this.selectorInput.input.value, this.fontSelect.el.value);
+      } catch (error) {
+        console.log(error);
       }
-      sendMessageToContent("apply_style", {
-        selector: this.selectorInput.input.value,
-        selectedFont : this.fontSelect.el.value
-      });
-			this.selectorInput.clear();
-		}
-		else {
+		} else {
 			this.selectorInput.input.classList.add('in-error');
 		}
 	}.bind(this));
@@ -186,14 +209,15 @@ var PrototypoMagic = function(fonts) {
 	this.listContainer.appendChild(this.listFontSelector.el);
 }
 
-/* SelectorInput */
-
+/**
+* SelectorInput
+*/
 var SelectorInput = function() {
   this.el = document.querySelector('.prototypo-magic-selector')
 
   this.input = document.querySelector('.prototypo-magic-selector-input');
-  if (previouslySelectedElement !== "") {
-    this.input.value = previouslySelectedElement;
+  if (previouslySelectedElements.length > 0) {
+    this.input.value = previouslySelectedElements[previouslySelectedElements.length - 1].selector;
   }
 
   this.selectionMode = document.querySelector('.prototypo-magic-selection-mode');
@@ -206,6 +230,7 @@ var SelectorInput = function() {
 
 	this.selectionMode.addEventListener('click', selectionProcess.bind(this));
 
+  // launch selection process
 	function selectionProcess() {
       var selection = !this.selectionModeState;
       var selectedFont = document.querySelector('.prototypo-magic-select').value;
@@ -219,35 +244,31 @@ var SelectorInput = function() {
         self: self,
         font: selectedFont
       });
-      window.close();
+      // then close the popup
+      window.close(); // idealement ici faire ça en callback apres reponse du contentScript
 	}
 
 	this.elementAffected = [];
 
 	this.input.addEventListener('keyup', function(e) {
 		var selector = e.target.value;
-    if (selector !== ""){
-      sendMessageToContent("select_elements", {
-        selector: selector
-      });
+    if (selector) {
+      try {
+        document.querySelectorAll(selector);
+        sendMessageToContent("select_elements", {
+          selector: selector
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
 	});
 }
 
-SelectorInput.prototype.clear = function() {
-	Array.prototype.forEach.call(this.elementAffected, function(el) {
-		el.classList.remove('prototypo-selected');
-	});
-
-	if (this.elementHighlighted) {
-		this.elementHighlighted.style.outline = 'none';
-	}
-
-	this.input.value = '';
-}
-
-/* FontSelect */
-
+/**
+* FontSelect
+* @param {array} fonts - loaded fonts from Prototypo
+*/
 var FontSelect = function(fonts) {
 
 	this.el = document.querySelector('.prototypo-magic-select');
@@ -264,18 +285,19 @@ var FontSelect = function(fonts) {
 	}.bind(this));
 
   // select previously selected font if necessary
-  if (previouslySelectedFont !== ""){
+  if (previouslySelectedFont !== "") {
     var options = document.querySelectorAll('.prototypo-magic-select option');
-    Array.prototype.forEach.call(options,function(option){
-      if (option.value === previouslySelectedFont){
+    Array.prototype.forEach.call(options,function(option) {
+      if (option.value === previouslySelectedFont) {
         option.selected = true;
       }
     });
   }
 }
 
-/* PrototypoError */
-
+/**
+* PrototypoError
+*/
 var PrototypoError = function(message) {
 	this.el = document.createElement('div');
 	this.el.classList.add('prototypo-magic-error');
@@ -288,7 +310,7 @@ var PrototypoError = function(message) {
 * @param {object} message - a key:value message object
 */
 function sendMessageToContent(action, message) {
-  if(typeof action === "string"){
+  if (typeof action === "string") {
     chrome.tabs.getSelected(null, function(tab) {
       // send a request to the content script
       chrome.tabs.sendRequest(
@@ -305,4 +327,46 @@ function sendMessageToContent(action, message) {
   } else {
     throw new Error("sendMessageToContent - action (first parameter) must be of type 'string'");
   }
+}
+
+/**
+*	Stores the selected element in chrome storage
+* @param {string} selector - concerned selector stored as a string
+* @param {string} font - concerned font stored as a string
+*/
+function storeElement(selector, font) {
+	chrome.storage.local.get("selectedElements", function(data) {
+		if (data) {
+			if (data.selectedElements) {
+				data.selectedElements.push({ selector: selector, font: font });
+				chrome.storage.local.set({ selectedElements: data.selectedElements });
+			} else {
+				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
+			}
+		}
+	});
+}
+
+/**
+*	Removes the selected element from chrome storage
+* @param {string} selector - concerned selector stored as a string
+*/
+function removeStoredElement(selector) {
+  var indexToRemove;
+	chrome.storage.local.get("selectedElements", function(data) {
+		if (data) {
+			if (data.selectedElements) {
+        // loop over the array to find the index we want to remove
+        data.selectedElements.forEach(function(element, index) {
+          if (element.selector === selector) {
+            indexToRemove = index;
+          }
+        });
+        // remove the index
+				data.selectedElements.splice(indexToRemove, 1);
+        // set the newly obtained table
+				chrome.storage.local.set({ selectedElements: data.selectedElements });
+			}
+		}
+	});
 }

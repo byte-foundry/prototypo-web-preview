@@ -6,15 +6,17 @@ chrome.browserAction.setIcon({ path: 'p-menu.svg' });
 chrome.browserAction.onClicked.addListener(function(e) {
 
 	chrome.tabs.sendMessage(e.id, {activate: true}, function(response) {
-		chrome.browserAction.setIcon({
-			path: 'p-menu' + response.iconState + '.svg',
-		});
+		if (response) {
+			chrome.browserAction.setIcon({
+				path: 'p-menu' + response.iconState + '.svg',
+			});
 
-		if (response.isActive) {
-			activationList[e.id] = true;
-		}
-		else {
-			activationList[e.id] = false;
+			if (response.isActive) {
+				activationList[e.id] = true;
+			}
+			else {
+				activationList[e.id] = false;
+			}
 		}
 	});
 
