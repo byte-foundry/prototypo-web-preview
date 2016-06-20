@@ -13,22 +13,39 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "get_libraries":
       sendResponse(fonts);
       break;
+    // apply selected font to sent element
+    case "apply_style":
+      applyStyle(request);
+      break;
     default:
-      sendResponse({});
+      sendResponse("default_response from content");
   }
 });
 
 /**
 * Starts selection process
-* @param request - the request sent by the popup
+* @param {object} request - the request sent by the popup
 */
 function selectionProcess(request) {
   var selectionStart = new CustomEvent('selection_start',{'detail' : request});
   window.dispatchEvent(selectionStart);
 }
 
-/* */
+/**
+* Stops selection process
+* @param {object} request - the request sent by the popup
+*/
 function stopSelectionProcess(request) {
   var selectionStop = new CustomEvent('selection_stop',{'detail' : request});
   window.dispatchEvent(selectionStop);
+}
+
+/**
+* Emmit an event in order to apply styles
+* Directly from selector input in the popup
+* @param {object} request - the request sent by the popup
+*/
+function applyStyle(request) {
+  var applyStyle = new CustomEvent('apply_style',{'detail' : request});
+  window.dispatchEvent(applyStyle);
 }

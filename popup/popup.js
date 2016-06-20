@@ -27,16 +27,16 @@ window.addEventListener("load", function() {
 
   // retrieve previously selected element
 	chrome.storage.local.get("selectedElement", function(data) {
-      if(data){
-        if(data.selectedElement){
-            previouslySelectedElement = data.selectedElement;
+      if (data) {
+        if (data.selectedElement) {
+          previouslySelectedElement = data.selectedElement;
         }
       }
   });
 	chrome.storage.local.get("selectedFont", function(data) {
-      if(data){
-        if(data.selectedFont){ console.log(selectedFont);
-            previouslySelectedFont = data.selectedFont;
+      if (data) {
+        if (data.selectedFont) {
+          previouslySelectedFont = data.selectedFont;
         }
       }
   });
@@ -160,7 +160,12 @@ var PrototypoMagic = function(fonts) {
 		if (this.selectorInput.input.value) {
 			e.stopPropagation();
 			this.selectorInput.input.classList.remove('in-error');
-			this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
+      // send message to content
+			// this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
+      sendMessageToContent("apply_style", {
+        selector: this.selectorInput.input.value,
+        selectedFont : this.fontSelect.el.value
+      });
 			this.selectorInput.clear();
 		}
 		else {
@@ -302,7 +307,6 @@ var FontSelect = function(fonts) {
 
   // select previously selected font if necessary
   if (previouslySelectedFont !== ""){
-    console.log(previouslySelectedFont);
     var options = document.querySelectorAll('.prototypo-magic-select option');
     Array.prototype.forEach.call(options,function(option){
       if (option.value === previouslySelectedFont){
@@ -318,4 +322,29 @@ var PrototypoError = function(message) {
 	this.el = document.createElement('div');
 	this.el.classList.add('prototypo-magic-error');
 	this.el.innerText = message;
+}
+
+/**
+* A helper function to send a message to the content script
+* @param {string} action - a string representing the action to be sent
+* @param {object} message - a key:value message object
+*/
+function sendMessageToContent(action, message) {
+  if(typeof action === "string"){
+    chrome.tabs.getSelected(null, function(tab) {
+      // send a request to the content script
+      chrome.tabs.sendRequest(
+        tab.id,
+        {
+          action: action,
+          message: message
+        },
+        function(response) {
+          console.log(response);
+        }
+      );
+    });
+  } else {
+    throw new Error("Action must be of type 'string'");
+  }
 }
