@@ -72,6 +72,22 @@ window.addEventListener("apply_style", function(e) {
 	});
 });
 
+// on keyup in popup selection input
+window.addEventListener("select_elements", function(e) {
+		var highlightedElements = document.querySelectorAll('.prototypo-selected');
+		var elementsToHighlight = document.querySelectorAll(e.detail.message.selector);
+
+		// un-highlight previously highlighted elements
+		Array.prototype.forEach.call(highlightedElements, function(el) {
+			el.classList.remove('prototypo-selected');
+		});
+
+		// highlight concerned elements
+		Array.prototype.forEach.call(elementsToHighlight, function(el) {
+			el.classList.add('prototypo-selected');
+		});
+});
+
 // listening to protypo app worker messages
 window.addEventListener('message', function(e) {
 	if (!iframe) {

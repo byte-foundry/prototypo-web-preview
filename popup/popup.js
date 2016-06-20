@@ -164,11 +164,11 @@ var PrototypoMagic = function(fonts) {
 			this.selectorInput.input.classList.remove('in-error');
       // send message to content
 			// this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
-      /*try{
+      try{
         document.querySelector(this.selectorInput.input.value);
       } catch (e) {
         console.log("e");
-      }*/
+      }
       sendMessageToContent("apply_style", {
         selector: this.selectorInput.input.value,
         selectedFont : this.fontSelect.el.value
@@ -204,38 +204,6 @@ var SelectorInput = function() {
 
 	var self = this;
 
-	function highlightEl(e) {
-		if (self.elementHighlighted) {
-			self.elementHighlighted.style.outline = 'none';
-		}
-    // envoyer un message ?
-		e.target.style.outline = 'solid 2px #29d390';
-		self.elementHighlighted = e.target;
-	}
-
-	function highlightParent(e) {
-		highlightEl({target: e.target.parentNode});
-	}
-
-	function chooseEl(e) {
-		if (e.target === e.currentTarget) {
-			e.target.style.outline = 'none';
-			e.preventDefault();
-			e.stopPropagation();
-			var selector = OptimalSelect.select(e.target);
-			self.input.value = selector;
-			self.selectionModeState = false;
-			self.selectionMode.classList.remove('is-active');
-			Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
-				el.removeEventListener('mouseenter', highlightEl);
-				el.removeEventListener('mouseleave', highlightParent);
-				el.removeEventListener('click', chooseEl);
-			});
-
-			selectElements(selector);
-		}
-	}
-
 	this.selectionMode.addEventListener('click', selectionProcess.bind(this));
 
 	function selectionProcess() {
@@ -256,21 +224,13 @@ var SelectorInput = function() {
 
 	this.elementAffected = [];
 
-	function selectElements(selector) {
-		Array.prototype.forEach.call(self.elementAffected, function(el) {
-			el.classList.remove('prototypo-selected');
-		});
-
-		self.elementAffected = document.querySelectorAll(selector);
-		Array.prototype.forEach.call(self.elementAffected, function(el) {
-			el.classList.add('prototypo-selected');
-		});
-	}
-
 	this.input.addEventListener('keyup', function(e) {
 		var selector = e.target.value;
-
-		selectElements(selector);
+    if (selector !== ""){
+      sendMessageToContent("select_elements", {
+        selector: selector
+      });
+    }
 	});
 }
 

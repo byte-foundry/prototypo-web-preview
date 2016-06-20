@@ -17,6 +17,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "apply_style":
       applyStyle(request);
       break;
+    // apply selected font to sent element
+    case "select_elements":
+      selectElements(request);
+      break;
     default:
       sendResponse("default_response from content");
   }
@@ -39,4 +43,13 @@ function selectionProcess(request) {
 function applyStyle(request) {
   var applyStyle = new CustomEvent('apply_style',{'detail' : request});
   window.dispatchEvent(applyStyle);
+}
+
+/**
+* Emmit an event in order to select elements
+* @param {object} request - the request sent by the popup
+*/
+function selectElements(request) {
+  var selectElements = new CustomEvent('select_elements',{'detail' : request});
+  window.dispatchEvent(selectElements);
 }
