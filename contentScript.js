@@ -33,10 +33,10 @@ window.addEventListener('unload', function() {
 // on element selection start
 window.addEventListener("selection_start", function(e) {
 	// here we store the font that was selected in the popup
-	selectedFont = e.detail.font;
+	selectedFont = e.detail.message.font;
 	storeSelectedFont(selectedFont);
 
-	if (e.detail.selection) {
+	if (e.detail.message.selection) {
 		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
 			el.addEventListener('mouseenter', highlightEl);
 			el.addEventListener('mouseleave', highlightParent);

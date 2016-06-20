@@ -10,6 +10,7 @@ window.addEventListener("load", function() {
       {
         action: "get_libraries"
       },
+      // response function containing data sent by content script
       function(fonts) {
   			var prototypoButton = new PrototypoMagic(fonts.values);
   			document.body.appendChild(prototypoButton.el);
@@ -33,6 +34,7 @@ window.addEventListener("load", function() {
         }
       }
   });
+  // retrieve previously selected font
 	chrome.storage.local.get("selectedFont", function(data) {
       if (data) {
         if (data.selectedFont) {
@@ -162,6 +164,11 @@ var PrototypoMagic = function(fonts) {
 			this.selectorInput.input.classList.remove('in-error');
       // send message to content
 			// this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
+      /*try{
+        document.querySelector(this.selectorInput.input.value);
+      } catch (e) {
+        console.log("e");
+      }*/
       sendMessageToContent("apply_style", {
         selector: this.selectorInput.input.value,
         selectedFont : this.fontSelect.el.value
@@ -239,21 +246,12 @@ var SelectorInput = function() {
 			this.selectionMode.classList.toggle('is-active');
 
       // on click, send a request to the tab to start selection process
-      chrome.tabs.getSelected(null, function(tab) {
-        // send a request to the content script
-        chrome.tabs.sendRequest(
-          tab.id,
-          {
-            action: "start_selection",
-            selection: selection,
-            self: self,
-            font: selectedFont
-          },
-          function(response) {
-            console.log(response);
-          }
-        );
+      sendMessageToContent("start_selection", {
+        selection: selection,
+        self: self,
+        font: selectedFont
       });
+      window.close();
 	}
 
 	this.elementAffected = [];
@@ -345,6 +343,6 @@ function sendMessageToContent(action, message) {
       );
     });
   } else {
-    throw new Error("Action must be of type 'string'");
+    throw new Error("sendMessageToContent - action (first parameter) must be of type 'string'");
   }
 }

@@ -32,15 +32,6 @@ function selectionProcess(request) {
 }
 
 /**
-* Stops selection process
-* @param {object} request - the request sent by the popup
-*/
-function stopSelectionProcess(request) {
-  var selectionStop = new CustomEvent('selection_stop',{'detail' : request});
-  window.dispatchEvent(selectionStop);
-}
-
-/**
 * Emmit an event in order to apply styles
 * Directly from selector input in the popup
 * @param {object} request - the request sent by the popup
