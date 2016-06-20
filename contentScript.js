@@ -102,6 +102,15 @@ window.addEventListener("unhighlight_selection", function(e) {
 		item.classList.remove('prototypo-highlight');
 	});
 });
+// listening to style tag removal
+window.addEventListener("remove_style_tag", function(e) {
+	var tags = document.getElementsByTagName("style");
+	for(var i = 0; i < tags.length; i++) {
+		if (tags[i].getAttribute("data-selector") === e.detail.message.selector.replace(/ /g,"")) {
+			document.head.removeChild(tags[i]);
+		}
+	}
+});
 
 // listening to Prototypo app worker messages
 window.addEventListener('message', function(e) {
@@ -205,7 +214,8 @@ function chooseEl(e) {
 
 		// apply selected font
 		var styleEl = document.createElement('style');
-		var style = selector + ' { font-family: ' + selectedFont + ' !important;transition: background .2s ease, color .2s ease;}';
+		var style = selector + ' {font-family: ' + selectedFont + ' !important;transition: background .2s ease, color .2s ease;}';
+		styleEl.setAttribute("data-selector", selector.replace(/ /g,""));
 
 		if (styleEl.stylesheet) {
 			styleEl.stylesheet.cssText = style;

@@ -89,8 +89,7 @@ FontSelectorList.prototype.remove = function(selector) {
 				document.querySelector('.prototypo-magic-font-list-container').classList.remove('scale-out');
 				this.el.removeChild(item.el);
 
-        // envoyer un message
-				// document.head.removeChild(item.styleEl);
+        removeStyleTag(selector);
 
 				document.querySelector('.prototypo-magic-font-list-container').removeEventListener('animationend', endHandler);
         sendMessageToContent("unhighlight_selection", {
@@ -104,8 +103,7 @@ FontSelectorList.prototype.remove = function(selector) {
 		item.el.addEventListener('animationend', function() {
 			this.el.removeChild(item.el);
 
-      // envoyer un message
-			// document.head.removeChild(item.styleEl);
+      removeStyleTag(selector);
 
       sendMessageToContent("unhighlight_selection", {
         selector: selector
@@ -369,4 +367,14 @@ function removeStoredElement(selector) {
 			}
 		}
 	});
+}
+
+/**
+* Remove corresponding style tag
+* @param {string} - the selector for which the tag must be removed
+*/
+function removeStyleTag(selector) {
+  sendMessageToContent("remove_style_tag", {
+    selector: selector
+  });
 }

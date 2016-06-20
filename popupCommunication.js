@@ -28,6 +28,8 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "unhighlight_selection":
       unHighlightSelection(request);
       break;
+    case "remove_style_tag":
+      removeStyleTag(request);
     default:
       sendResponse("default_response from content");
   }
@@ -77,4 +79,12 @@ function highlightSelection(request) {
 function unHighlightSelection(request) {
   var unHighlightSelection = new CustomEvent('unhighlight_selection',{'detail' : request});
   window.dispatchEvent(unHighlightSelection);
+}
+
+/**
+* Remove corresponding style tag
+*/
+function removeStyleTag(request) {
+  var removeStyleTag = new CustomEvent('remove_style_tag',{'detail' : request});
+  window.dispatchEvent(removeStyleTag);
 }
