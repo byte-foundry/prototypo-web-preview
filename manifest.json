@@ -6,7 +6,8 @@
 	"version": "1.2",
 
 	"browser_action": {
-		"default_icon": "p-menu.png"
+		"default_icon": "p-menu.png",
+		"default_popup": "popup/popup.html"
 	},
 	"icons": {
 		"16": "p-menu-16.png",

@@ -1,5 +1,6 @@
 var previouslySelectedElements = [];
 var previouslySelectedFont = '';
+var selectorCount = 0;
 
 // on popup load
 window.addEventListener('load', function() {
@@ -93,6 +94,11 @@ FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
 	}
 
 	this.el.classList.remove('hidden');
+
+  // add one to the number of the current tab's badge
+  chrome.tabs.getSelected(null, function(tab) {
+    chrome.browserAction.setBadgeText({ text: (++selectorCount).toString(), tabId: tab.id });
+  });
 };
 
 /**
@@ -131,6 +137,16 @@ FontSelectorList.prototype.remove = function(selector) {
       });
 		}.bind(this));
 	}
+
+  // substract one to the number of the current tab's badge
+  chrome.tabs.getSelected(null, function(tab) {
+    if (selectorCount-1 > 0) {
+      chrome.browserAction.setBadgeText({ text: (--selectorCount).toString(), tabId: tab.id });
+    } else {
+      selectorCount = 0;
+      chrome.browserAction.setBadgeText({ text: '', tabId: tab.id });
+    }
+  });
 }
 
 /**
