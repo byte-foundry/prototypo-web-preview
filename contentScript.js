@@ -21,7 +21,7 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
 
 	// Some styles for a fancy sidebar
 	iframe.style.cssText = 'position:fixed;top:0;left:0;display:block;' +
-	'width:0px;height:0px;';
+	'width:0px;height:0px;border:none;';
 	document.body.appendChild(iframe);
 }
 
