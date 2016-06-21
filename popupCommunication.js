@@ -20,6 +20,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "select_elements":
       selectElements(request);
       break;
+    // unselect all elements
+    case "unselect_all_elements":
+      unselectAllElements();
+      break;
     // highlight selection
     case "highlight_selection":
       highlightSelection(request);
@@ -87,4 +91,9 @@ function unHighlightSelection(request) {
 function removeStyleTag(request) {
   var removeStyleTag = new CustomEvent('remove_style_tag',{'detail' : request});
   window.dispatchEvent(removeStyleTag);
+}
+
+function unselectAllElements() {
+  var unselectAllElements = new CustomEvent('unselect_all_elements');
+  window.dispatchEvent(unselectAllElements);
 }

@@ -49,7 +49,6 @@ window.addEventListener("selection_start", function(e) {
 			el.removeEventListener('click', chooseEl);
 		});
 		if (self.elementHighlighted) {
-			// envoyer un message
 			if (self.elementHighlighted.style) {
 				self.elementHighlighted.style.outline = 'none';
 			}
@@ -60,16 +59,13 @@ window.addEventListener("selection_start", function(e) {
 
 // on click on popup "apply" button
 window.addEventListener("apply_style", function(e) {
-	var selection = document.querySelectorAll(e.detail.message.selector);
 	selectedFont = e.detail.message.selectedFont;
 
 	// store relative data
-	storeElement(e.detail.message.selector);
 	storeSelectedFont(selectedFont);
 
-	Array.prototype.forEach.call(selection, function(element) {
-		chooseEl({target: element, currentTarget: element});
-	});
+	// apply style to element
+	applyStyleToEl(e.detail.message.selector, selectedFont);
 });
 
 // on keyup in popup selection input
@@ -86,6 +82,9 @@ window.addEventListener("select_elements", function(e) {
 		Array.prototype.forEach.call(elementsToHighlight, function(el) {
 			el.classList.add('prototypo-selected');
 		});
+});
+window.addEventListener("unselect_all_elements",function(e) {
+	 console.log(unselect_all_elements);
 });
 
 // listening to highlight
@@ -105,9 +104,17 @@ window.addEventListener("unhighlight_selection", function(e) {
 // listening to style tag removal
 window.addEventListener("remove_style_tag", function(e) {
 	var tags = document.getElementsByTagName("style");
+	var trimedSelector = e.detail.message.selector.replace(/ /g,"");
+	var tagsToDelete = [];
+
 	for(var i = 0; i < tags.length; i++) {
-		if (tags[i].getAttribute("data-selector") === e.detail.message.selector.replace(/ /g,"")) {
-			document.head.removeChild(tags[i]);
+		if (tags[i].getAttribute("data-selector") === trimedSelector) {
+			tagsToDelete.push(tags[i]);
+		}
+	}
+	if (tagsToDelete.length > 0) {
+		for(var i = 0; i < tagsToDelete.length; i++) {
+			document.head.removeChild(tagsToDelete[i]);
 		}
 	}
 });
@@ -172,7 +179,7 @@ function highlightParent(e) {
 }
 
 /**
-* Choose a DOM element and send it as a message to the popup
+* Choose a DOM element and store in chrome local data
 * @param {object} e - the event that called the function
 */
 function chooseEl(e) {
@@ -224,6 +231,47 @@ function chooseEl(e) {
 		}
 		document.head.appendChild(styleEl);
 	}
+}
+
+/**
+* Apply a style to a given set of elements
+* @param {string} selector - the selector
+* @param {string} font - the selected font
+*/
+function applyStyleToEl(selector, font) {
+	var elements = document.querySelectorAll(selector);
+	var styleEl = document.createElement('style');
+	var style = selector + ' {font-family: ' + selectedFont + ' !important;transition: background .2s ease, color .2s ease;}';
+
+	Array.prototype.forEach.call(elements, function (element){
+		element.style.outline = 'none';
+		element.classList.remove('prototypo-selected');
+	});
+
+	// storeElement(selector);
+
+	// asking iframe worker
+	if (iframe) {
+		var textInSelected = '';
+		// getting every piece of text containing characters to load
+		Array.prototype.forEach.call(elements, function(el) {
+			textInSelected += el.innerText;
+		});
+		// sending a message to the iframe worker
+		// in order to retrieve every character of selected fonts
+		// will make the iframe worker send a message back
+		iframe.contentWindow.postMessage({type: 'subset', data: textInSelected, add: true},iframeDomain);
+	}
+
+	// apply selected font
+	styleEl.setAttribute("data-selector", selector.replace(/ /g,""));
+
+	if (styleEl.stylesheet) {
+		styleEl.stylesheet.cssText = style;
+	} else {
+		styleEl.appendChild(document.createTextNode(style));
+	}
+	document.head.appendChild(styleEl);
 }
 
 /**

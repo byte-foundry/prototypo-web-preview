@@ -187,15 +187,26 @@ var PrototypoMagic = function(fonts) {
 			this.selectorInput.input.classList.remove('in-error');
       try {
         document.querySelector(this.selectorInput.input.value);
+
         sendMessageToContent("apply_style", {
           selector: this.selectorInput.input.value,
           selectedFont : this.fontSelect.el.value
         });
-        this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
+
+        // update existing selector if already existing
+        if (this.listFontSelector.list[this.selectorInput.input.value]) {
+          this.listFontSelector.list[this.selectorInput.input.value].fontNameContainer.innerHTML = this.fontSelect.el.value;
+        } else {
+          this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
+        }
+
         storeElement(this.selectorInput.input.value, this.fontSelect.el.value);
+
       } catch (error) {
         console.log(error);
+  			this.selectorInput.input.classList.add('in-error');
       }
+      this.selectorInput.input.value = '';
 		} else {
 			this.selectorInput.input.classList.add('in-error');
 		}
@@ -203,7 +214,7 @@ var PrototypoMagic = function(fonts) {
 
 	this.container.appendChild(this.validFont);
 
-	this.listFontSelector = new FontSelectorList();
+	this.listFontSelector = new FontSelectorList(); // après débug références un peu violentes, a checker
 	this.listContainer.appendChild(this.listFontSelector.el);
 }
 
@@ -250,6 +261,7 @@ var SelectorInput = function() {
 
 	this.input.addEventListener('keyup', function(e) {
 		var selector = e.target.value;
+    console.log(selector);
     if (selector) {
       try {
         document.querySelectorAll(selector);
@@ -259,6 +271,8 @@ var SelectorInput = function() {
       } catch (error) {
         console.log(error);
       }
+    } else {
+      sendMessageToContent("unselect_all_elements");
     }
 	});
 }
@@ -333,10 +347,24 @@ function sendMessageToContent(action, message) {
 * @param {string} font - concerned font stored as a string
 */
 function storeElement(selector, font) {
+  var isStored = false;
 	chrome.storage.local.get("selectedElements", function(data) {
 		if (data) {
 			if (data.selectedElements) {
-				data.selectedElements.push({ selector: selector, font: font });
+        // look up the array to see if selector is already in
+        data.selectedElements.forEach(function(element) {
+          if (element) {
+            // if the selector was already in the array
+            if(element.selector === selector) {
+              isStored = true;
+              element.font = font;
+            }
+          }
+        });
+        // if the selector was not present, add it
+        if (!isStored) {
+		      data.selectedElements.push({ selector: selector, font: font });
+        }
 				chrome.storage.local.set({ selectedElements: data.selectedElements });
 			} else {
 				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
