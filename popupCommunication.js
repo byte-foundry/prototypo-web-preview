@@ -3,44 +3,44 @@
 * data sent via "sendRequest" method in popup.js
 */
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-  switch (request.action) {
-    // start of selection process
-    case "start_selection":
-      selectionProcess(request);
-      break;
-    // iframe worker sent a message with character set
-    case "get_libraries":
-      sendResponse(fonts);
-      break;
-    // iframe worker sent a message with character set
-    case "get_error":
-      sendResponse(error);
-      break;
-    // apply selected font to sent element
-    case "apply_style":
-      applyStyle(request);
-      break;
-    // select elements
-    case "select_elements":
-      selectElements(request);
-      break;
-    // unselect all elements
-    case "unselect_all_elements":
-      unselectAllElements();
-      break;
-    // highlight selection
-    case "highlight_selection":
-      highlightSelection(request);
-      break;
-    // highlight selection
-    case "unhighlight_selection":
-      unHighlightSelection(request);
-      break;
-    case "remove_style_tag":
-      removeStyleTag(request);
-    default:
-      sendResponse("default response from content (unrecognized request action)");
-  }
+	switch (request.action) {
+		// start of selection process
+		case "start_selection":
+			selectionProcess(request);
+			break;
+		// iframe worker sent a message with character set
+		case "get_libraries":
+			sendResponse(fonts);
+			break;
+		// iframe worker sent a message with character set
+		case "get_error":
+			sendResponse(error);
+			break;
+		// apply selected font to sent element
+		case "apply_style":
+			applyStyle(request);
+			break;
+		// select elements
+		case "select_elements":
+			selectElements(request);
+			break;
+		// unselect all elements
+		case "unselect_all_elements":
+			unselectAllElements();
+			break;
+		// highlight selection
+		case "highlight_selection":
+			highlightSelection(request);
+			break;
+		// highlight selection
+		case "unhighlight_selection":
+			unHighlightSelection(request);
+			break;
+		case "remove_style_tag":
+			removeStyleTag(request);
+		default:
+			sendResponse("default response from content (unrecognized request action)");
+	}
 });
 
 /**
@@ -48,8 +48,8 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 * @param {object} request - the request sent by the popup
 */
 function selectionProcess(request) {
-  var selectionStart = new CustomEvent('selection_start',{'detail' : request});
-  window.dispatchEvent(selectionStart);
+	var selectionStart = new CustomEvent('selection_start',{'detail' : request});
+	window.dispatchEvent(selectionStart);
 }
 
 /**
@@ -58,8 +58,8 @@ function selectionProcess(request) {
 * @param {object} request - the request sent by the popup
 */
 function applyStyle(request) {
-  var applyStyle = new CustomEvent('apply_style',{'detail' : request});
-  window.dispatchEvent(applyStyle);
+	var applyStyle = new CustomEvent('apply_style',{'detail' : request});
+	window.dispatchEvent(applyStyle);
 }
 
 /**
@@ -67,8 +67,8 @@ function applyStyle(request) {
 * @param {object} request - the request sent by the popup
 */
 function selectElements(request) {
-  var selectElements = new CustomEvent('select_elements',{'detail' : request});
-  window.dispatchEvent(selectElements);
+	var selectElements = new CustomEvent('select_elements',{'detail' : request});
+	window.dispatchEvent(selectElements);
 }
 
 /**
@@ -76,8 +76,8 @@ function selectElements(request) {
 * @param {object} request - the request sent by the popup
 */
 function highlightSelection(request) {
-  var highlightSelection = new CustomEvent('highlight_selection',{'detail' : request});
-  window.dispatchEvent(highlightSelection);
+	var highlightSelection = new CustomEvent('highlight_selection',{'detail' : request});
+	window.dispatchEvent(highlightSelection);
 }
 
 /**
@@ -85,22 +85,22 @@ function highlightSelection(request) {
 * @param {object} request - the request sent by the popup
 */
 function unHighlightSelection(request) {
-  var unHighlightSelection = new CustomEvent('unhighlight_selection',{'detail' : request});
-  window.dispatchEvent(unHighlightSelection);
+	var unHighlightSelection = new CustomEvent('unhighlight_selection',{'detail' : request});
+	window.dispatchEvent(unHighlightSelection);
 }
 
 /**
 * Remove corresponding style tag
 */
 function removeStyleTag(request) {
-  var removeStyleTag = new CustomEvent('remove_style_tag',{'detail' : request});
-  window.dispatchEvent(removeStyleTag);
+	var removeStyleTag = new CustomEvent('remove_style_tag',{'detail' : request});
+	window.dispatchEvent(removeStyleTag);
 }
 
 /**
 * Unselect all elements
 */
 function unselectAllElements() {
-  var unselectAllElements = new CustomEvent('unselect_all_elements');
-  window.dispatchEvent(unselectAllElements);
+	var unselectAllElements = new CustomEvent('unselect_all_elements');
+	window.dispatchEvent(unselectAllElements);
 }

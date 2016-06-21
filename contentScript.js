@@ -298,24 +298,24 @@ function removeStyleTags(selector) {
 */
 
 function storeElement(selector, font) {
-  var isStored = false;
+	var isStored = false;
 	chrome.storage.local.get('selectedElements', function(data) {
 		if (data) {
 			if (data.selectedElements) {
-        // look up the array to see if selector is already in
-        data.selectedElements.forEach(function(element) {
-          if (element) {
-            // if the selector was already in the array
-            if(element.selector === selector) {
-              isStored = true;
-              element.font = font;
-            }
-          }
-        });
-        // if the selector was not present, add it
-        if (!isStored) {
-		      data.selectedElements.push({ selector: selector, font: font });
-        }
+				// look up the array to see if selector is already in
+				data.selectedElements.forEach(function(element) {
+					if (element) {
+						// if the selector was already in the array
+						if(element.selector === selector) {
+							isStored = true;
+							element.font = font;
+						}
+					}
+				});
+				// if the selector was not present, add it
+				if (!isStored) {
+					data.selectedElements.push({ selector: selector, font: font });
+				}
 				chrome.storage.local.set({ selectedElements: data.selectedElements });
 			} else {
 				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
