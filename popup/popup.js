@@ -3,6 +3,25 @@ var previouslySelectedFont = '';
 
 // on popup load
 window.addEventListener('load', function() {
+  // check for Prototypo error
+  chrome.tabs.getSelected(null, function(tab) {
+    chrome.tabs.sendRequest(
+      tab.id,
+      {
+        action: 'get_error'
+      },
+      // response function containing data sent by content script
+      function(error) {
+        if (error) {
+          var prototypoError = new PrototypoError(error);
+          while (document.body.firstChild) {
+            document.body.removeChild(document.body.firstChild);
+          }
+          document.body.appendChild(prototypoError.el);
+        }
+      }
+    );
+  });
   // retrieve fonts loaded by content script
   chrome.tabs.getSelected(null, function(tab) {
     chrome.tabs.sendRequest(
@@ -12,16 +31,18 @@ window.addEventListener('load', function() {
       },
       // response function containing data sent by content script
       function(fonts) {
-  			var prototypoButton = new PrototypoMagic(fonts.values);
-  			document.body.appendChild(prototypoButton.el);
-  			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  				prototypoButton.container.classList.toggle('hidden');
-  				prototypoButton.active = !prototypoButton.active;
-  				sendResponse({
-  					isActive: prototypoButton.active,
-  					iconState: prototypoButton.active ? '-hover-active' : ''
-  				});
-  			}.bind(this));
+        if (fonts) {
+    			var prototypoButton = new PrototypoMagic(fonts.values);
+    			document.body.appendChild(prototypoButton.el);
+    			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    				prototypoButton.container.classList.toggle('hidden');
+    				prototypoButton.active = !prototypoButton.active;
+    				sendResponse({
+    					isActive: prototypoButton.active,
+    					iconState: prototypoButton.active ? '-hover-active' : ''
+    				});
+    			}.bind(this));
+        }
       }
     );
   });
@@ -45,7 +66,7 @@ window.addEventListener('load', function() {
 });
 
 /**
-* Font selector
+* Font selector list
 */
 var FontSelectorList = function() {
   var self = this;

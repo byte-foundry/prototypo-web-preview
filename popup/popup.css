@@ -265,5 +265,6 @@
 	background: #fefefe;
 	z-index: 99999999999999999;
 	padding: 20px;
-	border-top: solid 4px #23d390;[201~
+	border-top: solid 4px #23d390;
+	min-width: 200px;
 }

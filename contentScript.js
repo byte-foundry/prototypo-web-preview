@@ -29,8 +29,6 @@ if (!location.ancestorOrigins.contains(extensionOrigin)) {
 window.addEventListener('unload', function() {
 	iframe.post({type: 'close'}, iframeDomain);
 });
-
-
 // on element selection start
 window.addEventListener('selection_start', function(e) {
 	// here we store the font that was selected in the popup
@@ -141,7 +139,7 @@ window.addEventListener('message', function(e) {
 			fonts = e.data;
 			break;
 		case 'error':
-			/* probablement envoyer un message a la popup egalement
+			/*
 			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 				var prototypoError = error = new PrototypoError(e.data.message);
 				document.body.appendChild(prototypoError.el);
@@ -151,6 +149,7 @@ window.addEventListener('message', function(e) {
 				});
 			}.bind(this));
 			*/
+			error = e.data.message;
 			break;
 	}
 }, false);

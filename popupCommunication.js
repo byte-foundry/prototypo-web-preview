@@ -12,6 +12,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "get_libraries":
       sendResponse(fonts);
       break;
+    // iframe worker sent a message with character set
+    case "get_error":
+      sendResponse(error);
+      break;
     // apply selected font to sent element
     case "apply_style":
       applyStyle(request);
@@ -35,7 +39,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case "remove_style_tag":
       removeStyleTag(request);
     default:
-      sendResponse("default_response from content");
+      sendResponse("default response from content (unrecognized request action)");
   }
 });
 
@@ -93,6 +97,9 @@ function removeStyleTag(request) {
   window.dispatchEvent(removeStyleTag);
 }
 
+/**
+* Unselect all elements
+*/
 function unselectAllElements() {
   var unselectAllElements = new CustomEvent('unselect_all_elements');
   window.dispatchEvent(unselectAllElements);
