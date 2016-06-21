@@ -63,6 +63,10 @@
 	color: white !important;
 }
 
+.prototypo-outlined {
+	outline: solid 2px #29d390 !important;
+}
+
 .height-out {
 	animation-name: heightout;
 	animation-timing-function: ease;

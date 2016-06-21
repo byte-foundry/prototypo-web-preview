@@ -1,14 +1,14 @@
 var previouslySelectedElements = [];
-var previouslySelectedFont = "";
+var previouslySelectedFont = '';
 
 // on popup load
-window.addEventListener("load", function() {
+window.addEventListener('load', function() {
   // retrieve fonts loaded by content script
   chrome.tabs.getSelected(null, function(tab) {
     chrome.tabs.sendRequest(
       tab.id,
       {
-        action: "get_libraries"
+        action: 'get_libraries'
       },
       // response function containing data sent by content script
       function(fonts) {
@@ -27,7 +27,7 @@ window.addEventListener("load", function() {
   });
 
   // retrieve previously selected element
-	chrome.storage.local.get("selectedElements", function(data) {
+	chrome.storage.local.get('selectedElements', function(data) {
       if (data) {
         if (data.selectedElements) {
           previouslySelectedElements = data.selectedElements;
@@ -35,7 +35,7 @@ window.addEventListener("load", function() {
       }
   });
   // retrieve previously selected font
-	chrome.storage.local.get("selectedFont", function(data) {
+	chrome.storage.local.get('selectedFont', function(data) {
       if (data) {
         if (data.selectedFont) {
           previouslySelectedFont = data.selectedFont;
@@ -49,7 +49,7 @@ window.addEventListener("load", function() {
 */
 var FontSelectorList = function() {
   var self = this;
-  this.el = document.querySelector(".prototypo-font-selector-list")
+  this.el = document.querySelector('.prototypo-font-selector-list')
 	this.list = {};
   previouslySelectedElements.forEach(function(element) {
     self.addFontSelector(element.selector, element.font);
@@ -92,7 +92,7 @@ FontSelectorList.prototype.remove = function(selector) {
         removeStyleTag(selector);
 
 				document.querySelector('.prototypo-magic-font-list-container').removeEventListener('animationend', endHandler);
-        sendMessageToContent("unhighlight_selection", {
+        sendMessageToContent('unhighlight_selection', {
           selector: selector
         });
 		}.bind(this);
@@ -105,7 +105,7 @@ FontSelectorList.prototype.remove = function(selector) {
 
       removeStyleTag(selector);
 
-      sendMessageToContent("unhighlight_selection", {
+      sendMessageToContent('unhighlight_selection', {
         selector: selector
       });
 		}.bind(this));
@@ -146,13 +146,13 @@ var FontSelectorLink = function(selector, fontname, parent) {
 	this.el.appendChild(this.fontNameContainer);
 
 	this.el.addEventListener('mouseenter', function() {
-    sendMessageToContent("highlight_selection", {
+    sendMessageToContent('highlight_selection', {
       selector: selector
     });
 	});
 
 	this.el.addEventListener('mouseleave', function() {
-    sendMessageToContent("unhighlight_selection", {
+    sendMessageToContent('unhighlight_selection', {
       selector: selector
     });
 	});
@@ -188,7 +188,7 @@ var PrototypoMagic = function(fonts) {
       try {
         document.querySelector(this.selectorInput.input.value);
 
-        sendMessageToContent("apply_style", {
+        sendMessageToContent('apply_style', {
           selector: this.selectorInput.input.value,
           selectedFont : this.fontSelect.el.value
         });
@@ -248,7 +248,8 @@ var SelectorInput = function() {
 			this.selectionMode.classList.toggle('is-active');
 
       // on click, send a request to the tab to start selection process
-      sendMessageToContent("start_selection", {
+      sendMessageToContent('unselect_all_elements');
+      sendMessageToContent('start_selection', {
         selection: selection,
         self: self,
         font: selectedFont
@@ -265,14 +266,14 @@ var SelectorInput = function() {
     if (selector) {
       try {
         document.querySelectorAll(selector);
-        sendMessageToContent("select_elements", {
+        sendMessageToContent('select_elements', {
           selector: selector
         });
       } catch (error) {
         console.log(error);
       }
     } else {
-      sendMessageToContent("unselect_all_elements");
+      sendMessageToContent('unselect_all_elements');
     }
 	});
 }
@@ -297,7 +298,7 @@ var FontSelect = function(fonts) {
 	}.bind(this));
 
   // select previously selected font if necessary
-  if (previouslySelectedFont !== "") {
+  if (previouslySelectedFont !== '') {
     var options = document.querySelectorAll('.prototypo-magic-select option');
     Array.prototype.forEach.call(options,function(option) {
       if (option.value === previouslySelectedFont) {
@@ -322,7 +323,7 @@ var PrototypoError = function(message) {
 * @param {object} message - a key:value message object
 */
 function sendMessageToContent(action, message) {
-  if (typeof action === "string") {
+  if (typeof action === 'string') {
     chrome.tabs.getSelected(null, function(tab) {
       // send a request to the content script
       chrome.tabs.sendRequest(
@@ -337,7 +338,7 @@ function sendMessageToContent(action, message) {
       );
     });
   } else {
-    throw new Error("sendMessageToContent - action (first parameter) must be of type 'string'");
+    throw new Error('sendMessageToContent - action (first parameter) must be of type string');
   }
 }
 
@@ -348,7 +349,7 @@ function sendMessageToContent(action, message) {
 */
 function storeElement(selector, font) {
   var isStored = false;
-	chrome.storage.local.get("selectedElements", function(data) {
+	chrome.storage.local.get('selectedElements', function(data) {
 		if (data) {
 			if (data.selectedElements) {
         // look up the array to see if selector is already in
@@ -379,7 +380,7 @@ function storeElement(selector, font) {
 */
 function removeStoredElement(selector) {
   var indexToRemove;
-	chrome.storage.local.get("selectedElements", function(data) {
+	chrome.storage.local.get('selectedElements', function(data) {
 		if (data) {
 			if (data.selectedElements) {
         // loop over the array to find the index we want to remove
@@ -402,7 +403,7 @@ function removeStoredElement(selector) {
 * @param {string} - the selector for which the tag must be removed
 */
 function removeStyleTag(selector) {
-  sendMessageToContent("remove_style_tag", {
+  sendMessageToContent('remove_style_tag', {
     selector: selector
   });
 }

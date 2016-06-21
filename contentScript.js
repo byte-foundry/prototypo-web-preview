@@ -2,10 +2,11 @@ var iframeDomain = 'http://localhost:9000/';
 var animationDuration = 200;
 var iframe;
 var error;
+var elementHighlighted;
 // available fonts from prototypo
 var fonts;
 // variable to store current selected font sent from popup
-var selectedFont = "";
+var selectedFont = '';
 
 // clear previously stored values on page load
 chrome.storage.local.clear();
@@ -31,7 +32,7 @@ window.addEventListener('unload', function() {
 
 
 // on element selection start
-window.addEventListener("selection_start", function(e) {
+window.addEventListener('selection_start', function(e) {
 	// here we store the font that was selected in the popup
 	selectedFont = e.detail.message.font;
 	storeSelectedFont(selectedFont);
@@ -48,17 +49,22 @@ window.addEventListener("selection_start", function(e) {
 			el.removeEventListener('mouseleave', highlightParent);
 			el.removeEventListener('click', chooseEl);
 		});
-		if (self.elementHighlighted) {
-			if (self.elementHighlighted.style) {
-				self.elementHighlighted.style.outline = 'none';
-			}
-			self.elementHighlighted = undefined;
-		}
+	}
+});
+// on echap, stop selection
+window.addEventListener('keyup', function(e) {
+	if(e.keyCode === 27) {
+		unselectAllElements();
+		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+			el.removeEventListener('mouseenter', highlightEl);
+			el.removeEventListener('mouseleave', highlightParent);
+			el.removeEventListener('click', chooseEl);
+		});
 	}
 });
 
-// on click on popup "apply" button
-window.addEventListener("apply_style", function(e) {
+// on click on popup 'apply' button
+window.addEventListener('apply_style', function(e) {
 	selectedFont = e.detail.message.selectedFont;
 
 	// store relative data
@@ -69,7 +75,7 @@ window.addEventListener("apply_style", function(e) {
 });
 
 // on keyup in popup selection input
-window.addEventListener("select_elements", function(e) {
+window.addEventListener('select_elements', function(e) {
 		var highlightedElements = document.querySelectorAll('.prototypo-selected');
 		var elementsToHighlight = document.querySelectorAll(e.detail.message.selector);
 
@@ -83,42 +89,38 @@ window.addEventListener("select_elements", function(e) {
 			el.classList.add('prototypo-selected');
 		});
 });
-window.addEventListener("unselect_all_elements",function(e) {
-	 console.log(unselect_all_elements);
+window.addEventListener('unselect_all_elements',function(e) {
+	var highlightedElements = document.querySelectorAll('.prototypo-selected');
+	var outlinedElements = document.querySelectorAll('.prototypo-outlined');
+
+	// un-highlight previously highlighted elements
+	Array.prototype.forEach.call(highlightedElements, function(el) {
+		el.classList.remove('prototypo-selected');
+	});
+	// un-outline previously outlined elements
+	Array.prototype.forEach.call(outlinedElements, function(el) {
+		el.classList.remove('prototypo-outlined');
+	});
 });
 
 // listening to highlight
-window.addEventListener("highlight_selection", function(e) {
+window.addEventListener('highlight_selection', function(e) {
 	var items = document.querySelectorAll(e.detail.message.selector);
 	Array.prototype.forEach.call(items, function(item) {
 		item.classList.add('prototypo-highlight');
 	});
 });
 // listening to unhighlight
-window.addEventListener("unhighlight_selection", function(e) {
+window.addEventListener('unhighlight_selection', function(e) {
 	var items = document.querySelectorAll(e.detail.message.selector);
 	Array.prototype.forEach.call(items, function(item) {
 		item.classList.remove('prototypo-highlight');
 	});
 });
 // listening to style tag removal
-window.addEventListener("remove_style_tag", function(e) {
-	var tags = document.getElementsByTagName("style");
-	var trimedSelector = e.detail.message.selector.replace(/ /g,"");
-	var tagsToDelete = [];
-
-	for(var i = 0; i < tags.length; i++) {
-		if (tags[i].getAttribute("data-selector") === trimedSelector) {
-			tagsToDelete.push(tags[i]);
-		}
-	}
-	if (tagsToDelete.length > 0) {
-		for(var i = 0; i < tagsToDelete.length; i++) {
-			document.head.removeChild(tagsToDelete[i]);
-		}
-	}
+window.addEventListener('remove_style_tag', function(e) {
+	removeStyleTags(e.detail.message.selector);
 });
-
 // listening to Prototypo app worker messages
 window.addEventListener('message', function(e) {
 	if (!iframe) {
@@ -158,16 +160,17 @@ window.addEventListener('message', function(e) {
 * @param {object} e - the event that called the function
 */
 function highlightEl(e) {
-	if (self.elementHighlighted) {
-		if (self.elementHighlighted.style) {
-			self.elementHighlighted.style.outline = 'none';
+	if (elementHighlighted) {
+		if (elementHighlighted.classList) {
+			elementHighlighted.classList.remove('prototypo-outlined');
 		}
 	}
 
-	if (e.target.style) {
-		e.target.style.outline = 'solid 2px #29d390';
+	if (e.target.classList) {
+		e.target.classList.add('prototypo-outlined');
 	}
-	self.elementHighlighted = e.target;
+
+	elementHighlighted = e.target;
 }
 
 /**
@@ -184,7 +187,7 @@ function highlightParent(e) {
 */
 function chooseEl(e) {
 	if (e.target === e.currentTarget) {
-		e.target.style.outline = 'none';
+		e.target.classList.remove('prototypo-outlined');
 		if (e.preventDefault){
 			e.preventDefault();
 		}
@@ -193,12 +196,8 @@ function chooseEl(e) {
 		}
 
 		var selector = OptimalSelect.select(e.target);
-		/* envoyer message pour mettre à jour la popup
-		self.selectionModeState = false;
-		self.selectionMode.classList.remove('is-active');
-		selectElements(selector);
-		*/
-		storeElement(selector);
+
+		storeElement(selector, selectedFont);
 
 		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
 			el.removeEventListener('mouseenter', highlightEl);
@@ -220,16 +219,8 @@ function chooseEl(e) {
 		}
 
 		// apply selected font
-		var styleEl = document.createElement('style');
-		var style = selector + ' {font-family: ' + selectedFont + ' !important;transition: background .2s ease, color .2s ease;}';
-		styleEl.setAttribute("data-selector", selector.replace(/ /g,""));
-
-		if (styleEl.stylesheet) {
-			styleEl.stylesheet.cssText = style;
-		} else {
-			styleEl.appendChild(document.createTextNode(style));
-		}
-		document.head.appendChild(styleEl);
+		removeStyleTags(selector);
+		addStyleTag(selector);
 	}
 }
 
@@ -240,15 +231,11 @@ function chooseEl(e) {
 */
 function applyStyleToEl(selector, font) {
 	var elements = document.querySelectorAll(selector);
-	var styleEl = document.createElement('style');
-	var style = selector + ' {font-family: ' + selectedFont + ' !important;transition: background .2s ease, color .2s ease;}';
 
 	Array.prototype.forEach.call(elements, function (element){
-		element.style.outline = 'none';
+		element.classList.remove('prototypo-outlined');
 		element.classList.remove('prototypo-selected');
 	});
-
-	// storeElement(selector);
 
 	// asking iframe worker
 	if (iframe) {
@@ -264,7 +251,18 @@ function applyStyleToEl(selector, font) {
 	}
 
 	// apply selected font
-	styleEl.setAttribute("data-selector", selector.replace(/ /g,""));
+	removeStyleTags(selector);
+	addStyleTag(selector);
+}
+
+/**
+* Adds a style tag for a selector
+* @param {string} selector - the selector
+*/
+function addStyleTag(selector) {
+	var styleEl = document.createElement('style');
+	var style = selector + ' {font-family: ' + selectedFont + ' !important; transition: background .2s ease, color .2s ease;}';
+	styleEl.setAttribute('data-selector', selector.replace(/ /g,''));
 
 	if (styleEl.stylesheet) {
 		styleEl.stylesheet.cssText = style;
@@ -275,17 +273,53 @@ function applyStyleToEl(selector, font) {
 }
 
 /**
+* Removes all style tags for a selector
+* @param {string} selector - the selector
+*/
+function removeStyleTags(selector) {
+	var tags = document.getElementsByTagName('style');
+	var trimedSelector = selector.replace(/ /g,'');
+	var tagsToDelete = [];
+
+	for(var i = 0; i < tags.length; i++) {
+		if (tags[i].getAttribute('data-selector') === trimedSelector) {
+			tagsToDelete.push(tags[i]);
+		}
+	}
+	if (tagsToDelete.length > 0) {
+		for(var i = 0; i < tagsToDelete.length; i++) {
+			document.head.removeChild(tagsToDelete[i]);
+		}
+	}
+}
+
+/**
 *	Stores the selected element in chrome storage
 * @param {string} selector - concerned selector stored as a string
 */
-function storeElement(selector) {
-	chrome.storage.local.get("selectedElements", function(data) {
+
+function storeElement(selector, font) {
+  var isStored = false;
+	chrome.storage.local.get('selectedElements', function(data) {
 		if (data) {
 			if (data.selectedElements) {
-				data.selectedElements.push({ selector: selector, font: selectedFont });
+        // look up the array to see if selector is already in
+        data.selectedElements.forEach(function(element) {
+          if (element) {
+            // if the selector was already in the array
+            if(element.selector === selector) {
+              isStored = true;
+              element.font = font;
+            }
+          }
+        });
+        // if the selector was not present, add it
+        if (!isStored) {
+		      data.selectedElements.push({ selector: selector, font: font });
+        }
 				chrome.storage.local.set({ selectedElements: data.selectedElements });
 			} else {
-				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: selectedFont }] });
+				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
 			}
 		}
 	});
