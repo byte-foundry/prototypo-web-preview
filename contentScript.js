@@ -139,16 +139,6 @@ window.addEventListener('message', function(e) {
 			fonts = e.data;
 			break;
 		case 'error':
-			/*
-			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-				var prototypoError = error = new PrototypoError(e.data.message);
-				document.body.appendChild(prototypoError.el);
-				sendResponse({
-					isActive: false,
-					iconState: ''
-				});
-			}.bind(this));
-			*/
 			error = e.data.message;
 			break;
 	}
@@ -276,20 +266,12 @@ function addStyleTag(selector) {
 * @param {string} selector - the selector
 */
 function removeStyleTags(selector) {
-	var tags = document.getElementsByTagName('style');
 	var trimedSelector = selector.replace(/ /g,'');
-	var tagsToDelete = [];
+	var tags = document.querySelectorAll('style[data-selector="' + trimedSelector + '"]');
 
-	for(var i = 0; i < tags.length; i++) {
-		if (tags[i].getAttribute('data-selector') === trimedSelector) {
-			tagsToDelete.push(tags[i]);
-		}
-	}
-	if (tagsToDelete.length > 0) {
-		for(var i = 0; i < tagsToDelete.length; i++) {
-			document.head.removeChild(tagsToDelete[i]);
-		}
-	}
+	Array.prototype.forEach.call(tags, function(tag) {
+		document.head.removeChild(tag);
+	});
 }
 
 /**
