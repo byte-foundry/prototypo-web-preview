@@ -88,12 +88,17 @@ window.addEventListener('select_elements', function(e) {
 		});
 });
 window.addEventListener('unselect_all_elements',function(e) {
-	var highlightedElements = document.querySelectorAll('.prototypo-selected');
+	var highlightedElements = document.querySelectorAll('.prototypo-highlight');
+	var selectedElements = document.querySelectorAll('.prototypo-selected');
 	var outlinedElements = document.querySelectorAll('.prototypo-outlined');
 
 	// un-highlight previously highlighted elements
 	Array.prototype.forEach.call(highlightedElements, function(el) {
 		el.classList.remove('prototypo-selected');
+	});
+	// un-select previously selected elements
+	Array.prototype.forEach.call(selectedElements, function(item) {
+		item.classList.add('prototypo-highlight');
 	});
 	// un-outline previously outlined elements
 	Array.prototype.forEach.call(outlinedElements, function(el) {
@@ -266,12 +271,22 @@ function addStyleTag(selector) {
 * @param {string} selector - the selector
 */
 function removeStyleTags(selector) {
+	var tags = document.getElementsByTagName('style');
 	var trimedSelector = selector.replace(/ /g,'');
-	var tags = document.querySelectorAll('style[data-selector="' + trimedSelector + '"]');
+	var tagsToDelete = [];
 
-	Array.prototype.forEach.call(tags, function(tag) {
-		document.head.removeChild(tag);
-	});
+	// here we have to loop over the tags and get the attribute 'by hand'
+	// because querySelectorAll will not allow string containing special characters
+	for(var i = 0; i < tags.length; i++) {
+		if (tags[i].getAttribute('data-selector') === trimedSelector) {
+			tagsToDelete.push(tags[i]);
+		}
+	}
+	if (tagsToDelete.length > 0) {
+		for(var i = 0; i < tagsToDelete.length; i++) {
+			document.head.removeChild(tagsToDelete[i]);
+		}
+	}
 }
 
 /**

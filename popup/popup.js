@@ -63,6 +63,8 @@ window.addEventListener('load', function() {
 				}
 			}
 	});
+
+	updateBadgeCount();
 });
 
 /**
@@ -181,6 +183,7 @@ var FontSelectorLink = function(selector, fontname, parent) {
 	this.selectorDelete.addEventListener('click', function(e) {
 		this.list.remove(this.selector);
 		removeStoredElement(this.selector);
+		sendMessageToContent('unselect_all_elements');
 	}.bind(this));
 };
 
@@ -391,16 +394,7 @@ function storeElement(selector, font) {
 				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
 			}
 		}
-		// set the number of the current tab's badge
-		chrome.storage.local.get('selectedElements', function(data) {
-			if (data) {
-				if (data.selectedElements) {
-					chrome.tabs.getSelected(null, function(tab) {
-						chrome.browserAction.setBadgeText({ text: (data.selectedElements.length).toString(), tabId: tab.id });
-					});
-				}
-			}
-		});
+		updateBadgeCount();
 	});
 }
 
@@ -425,20 +419,7 @@ function removeStoredElement(selector) {
 				chrome.storage.local.set({ selectedElements: data.selectedElements });
 			}
 		}
-		// set the number of the current tab's badge
-		chrome.storage.local.get('selectedElements', function(data) {
-			if (data) {
-				if (data.selectedElements) {
-					chrome.tabs.getSelected(null, function(tab) {
-						if (data.selectedElements.length > 0) {
-							chrome.browserAction.setBadgeText({ text: (data.selectedElements.length).toString(), tabId: tab.id });
-						} else {
-							chrome.browserAction.setBadgeText({ text: '', tabId: tab.id });
-						}
-					});
-				}
-			}
-		});
+		updateBadgeCount();
 	});
 }
 
@@ -449,5 +430,25 @@ function removeStoredElement(selector) {
 function removeStyleTag(selector) {
 	sendMessageToContent('remove_style_tag', {
 		selector: selector
+	});
+}
+
+/**
+* Update badge count
+*/
+function updateBadgeCount() {
+	// set the number of the current tab's badge
+	chrome.storage.local.get('selectedElements', function(data) {
+		if (data) {
+			if (data.selectedElements) {
+				chrome.tabs.getSelected(null, function(tab) {
+					if (data.selectedElements.length > 0) {
+						chrome.browserAction.setBadgeText({ text: (data.selectedElements.length).toString(), tabId: tab.id });
+					} else {
+						chrome.browserAction.setBadgeText({ text: '', tabId: tab.id });
+					}
+				});
+			}
+		}
 	});
 }
