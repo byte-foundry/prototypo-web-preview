@@ -238,7 +238,7 @@ var PrototypoMagic = function(fonts) {
 
 	this.container.appendChild(this.validFont);
 
-	this.listFontSelector = new FontSelectorList(); // après débug références un peu violentes, a checker
+	this.listFontSelector = new FontSelectorList();
 	this.listContainer.appendChild(this.listFontSelector.el);
 }
 
