@@ -189,7 +189,13 @@ function chooseEl(e) {
 			e.stopPropagation();
 		}
 
-		var selector = OptimalSelect.select(e.target);
+		var selector = OptimalSelect.select(e.target, {
+			ignore: {
+				class: function(className) {
+					return className === "";
+				}
+			}
+		});
 
 		storeElement(selector, selectedFont);
 
