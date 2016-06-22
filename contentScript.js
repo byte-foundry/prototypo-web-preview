@@ -324,6 +324,7 @@ function storeElement(selector, font) {
 				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
 			}
 		}
+		sendMessageToBackground("update_badge_count");
 	});
 }
 
@@ -333,4 +334,23 @@ function storeElement(selector, font) {
 */
 function storeSelectedFont(selectedFont) {
 	chrome.storage.local.set({selectedFont: selectedFont});
+}
+
+/**
+* A helper function to send a message to the background script
+* @param {string} action - a string representing the action to be sent
+* @param {object} message - a key:value message object
+*/
+function sendMessageToBackground(action, message) {
+	if (typeof action === 'string') {
+		// send a request to the background script
+		chrome.runtime.sendMessage(
+			{
+				action: action,
+				message: message
+			}
+		);
+	} else {
+		throw new Error('sendMessageToBackground - action (first parameter) must be of type string');
+	}
 }

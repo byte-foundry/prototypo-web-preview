@@ -36,8 +36,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 		case "unhighlight_selection":
 			unHighlightSelection(request);
 			break;
+		// remove style tags
 		case "remove_style_tag":
 			removeStyleTag(request);
+			break;
 		default:
 			sendResponse("default response from content (unrecognized request action)");
 	}
