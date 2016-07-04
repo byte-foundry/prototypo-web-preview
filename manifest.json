@@ -6,7 +6,8 @@
 	"version": "1.2",
 
 	"browser_action": {
-		"default_icon": "p-menu.png"
+		"default_icon": "p-menu.png",
+		"default_popup": "popup/popup.html"
 	},
 	"icons": {
 		"16": "p-menu-16.png",
@@ -14,7 +15,7 @@
 		"128": "p-menu-128.png"
 	},
 	"content_scripts": [{
-		"js": ["optimal-select.js","contentScript.js"],
+		"js": ["optimal-select.js","contentScript.js","popupCommunication.js"],
 		"matches": ["*://*/*"],
 		"css": ["prototypo.css"]
 	}],
@@ -24,7 +25,8 @@
 	"permissions": [
 		"tabs",
 		"https://*/",
-		"http://*/"
+		"http://*/",
+		"storage"
 	],
 	"web_accessible_resources": [
 		"http://localhost:9000/iframe.html",

@@ -1,290 +1,130 @@
 var iframeDomain = 'http://localhost:9000/';
 var animationDuration = 200;
-
-var FontSelectorList = function() {
-	this.el = document.createElement('ul');
-	this.el.classList.add('prototypo-font-selector-list');
-	this.el.classList.add('hidden');
-	this.list = {};
-};
-
-FontSelectorList.prototype.addFontSelector = function(selector, fontname) {
-	var item = new FontSelectorLink(selector, fontname, this);
-	this.el.appendChild(item.el);
-	document.head.appendChild(item.styleEl);
-
-	if (iframe) {
-		var textInSelected = '';
-		Array.prototype.forEach.call(document.querySelectorAll(selector), function(el) {
-			textInSelected += el.innerText;
-		});
-		iframe.contentWindow.postMessage({type: 'subset', data: textInSelected, add: true},iframeDomain);
-	}
-
-	this.list[selector] = item;
-
-	if (Object.keys(this.list).length === 1) {
-		document.querySelector('.prototypo-magic-font-list-container').classList.add('scale-in');
-	}
-	
-	this.el.classList.remove('hidden');
-};
-
-FontSelectorList.prototype.remove = function(selector) {
-	var item = this.list[selector];
-	delete this.list[selector];
-	if (Object.keys(this.list).length === 0) {
-		document.querySelector('.prototypo-magic-font-list-container').classList.remove('scale-in');
-		document.querySelector('.prototypo-magic-font-list-container').classList.add('scale-out');
-		var endHandler = function() {
-				this.el.classList.add('hidden');
-				document.querySelector('.prototypo-magic-font-list-container').classList.remove('scale-out');
-				this.el.removeChild(item.el);
-				document.head.removeChild(item.styleEl);
-				document.querySelector('.prototypo-magic-font-list-container').removeEventListener('animationend', endHandler);
-				var items = document.querySelectorAll(selector);
-				Array.prototype.forEach.call(items, function(item) {
-					item.classList.remove('prototypo-highlight');
-				});
-		}.bind(this);
-		document.querySelector('.prototypo-magic-font-list-container').addEventListener('animationend',
-			endHandler);
-	}
-	else {
-		item.el.classList.remove('height-in');
-		item.el.classList.add('height-out');
-		item.el.addEventListener('animationend', function() {
-			this.el.removeChild(item.el);
-			document.head.removeChild(item.styleEl);
-			var items = document.querySelectorAll(selector);
-			Array.prototype.forEach.call(items, function(item) {
-				item.classList.remove('prototypo-highlight');
-			});
-		}.bind(this));
-	}
-}
-
-var FontSelectorLink = function(selector, fontname, parent) {
-	this.selector = selector;
-	this.list = parent;
-
-	this.styleEl = document.createElement('style');
-	var style = selector + ' { font-family: ' + fontname + ' !important;transition: background .2s ease, color .2s ease;}';
-
-	if (this.styleEl.stylesheet) {
-		this.styleEl.stylesheet.cssText = style;
-	}
-	else {
-		this.styleEl.appendChild(document.createTextNode(style));
-	}
-
-	this.el = document.createElement('li');
-	this.el.classList.add('height-in');
-	this.selectorContainer = document.createElement('div');
-	this.selectorContainer.classList.add('prototypo-list-selector-container');
-
-	this.selectorName = document.createElement('div');
-	this.selectorName.classList.add('prototypo-list-selector-name');
-	this.selectorName.innerText = selector;
-
-	this.selectorDelete = document.createElement('div');
-	this.selectorDelete.classList.add('prototypo-list-selector-delete');
-	this.selectorDelete.style.backgroundImage = 'url(\'' + chrome.extension.getURL('delete.svg') + '\')';
-
-	this.selectorContainer.appendChild(this.selectorName);
-	this.selectorContainer.appendChild(this.selectorDelete);
-
-	this.fontNameContainer = document.createElement('div');
-	this.fontNameContainer.classList.add('prototypo-list-fontname-container');
-	this.fontNameContainer.innerText = fontname;
-	this.el.appendChild(this.selectorContainer);
-	this.el.appendChild(this.fontNameContainer);
-
-	this.el.addEventListener('mouseenter', function() {
-		var items = document.querySelectorAll(selector);
-		Array.prototype.forEach.call(items, function(item) {
-			item.classList.add('prototypo-highlight');
-		});
-	});
-
-	this.el.addEventListener('mouseleave', function() {
-		var items = document.querySelectorAll(selector);
-		Array.prototype.forEach.call(items, function(item) {
-			item.classList.remove('prototypo-highlight');
-		});
-	});
-
-	this.selectorDelete.addEventListener('click', function(e) {
-		this.list.remove(this.selector);
-	}.bind(this));
-};
-
-var PrototypoMagic = function(fonts) {
-	this.active = false;
-	this.el = document.createElement('div');
-	this.el.classList.add('prototypo-magic');
-
-	this.listContainer = document.createElement('div');
-	this.listContainer.classList.add('prototypo-magic-font-list-container');
-	this.el.appendChild(this.listContainer);
-
-	this.container = document.createElement('div');
-	this.container.classList.add('prototypo-magic-container');
-	this.container.classList.add('hidden');
-
-	this.selectorInput = new SelectorInput();
-	this.container.appendChild(this.selectorInput.el);
-
-	this.fontSelect = new FontSelect(fonts);
-	this.container.appendChild(this.fontSelect.el);
-
-	this.validFont = document.createElement('button');
-	this.validFont.classList.add('prototypo-magic-apply');
-	this.validFont.innerText = 'Apply';
-	this.validFont.addEventListener('click', function(e) {
-		if (this.selectorInput.input.value) {
-			e.stopPropagation();
-			this.selectorInput.input.classList.remove('in-error');
-			this.listFontSelector.addFontSelector(this.selectorInput.input.value, this.fontSelect.el.value);
-			this.selectorInput.clear();
-		}
-		else {
-			this.selectorInput.input.classList.add('in-error');
-		}
-	}.bind(this));
-
-	this.container.appendChild(this.validFont);
-
-	this.listFontSelector = new FontSelectorList();
-	this.listContainer.appendChild(this.listFontSelector.el);
-	this.el.appendChild(this.container);
-}
-
-var SelectorInput = function() {
-	this.el = document.createElement('div');
-	this.el.classList.add('prototypo-magic-selector');
-	this.input = document.createElement('input');
-	this.input.classList.add('prototypo-magic-selector-input');
-	this.input.placeholder = 'Add a CSS selector...';
-	this.selectionMode = document.createElement('div');
-	this.selectionMode.classList.add('prototypo-magic-selection-mode');
-	this.el.appendChild(this.selectionMode);
-	this.el.appendChild(this.input);
-	this.selectionModeState = false;
-
-	this.elementHighlighted = undefined;
-	var self = this;
-	function highlightEl(e) {
-		if (self.elementHighlighted) {
-			self.elementHighlighted.style.outline = 'none';
-		}
-		e.target.style.outline = 'solid 2px #29d390';
-		self.elementHighlighted = e.target;
-	}
-
-	function highlightParent(e) {
-		highlightEl({target: e.target.parentNode});
-	}
-
-	function chooseEl(e) {
-		if (e.target === e.currentTarget) {
-			e.target.style.outline = 'none';
-			e.preventDefault();
-			e.stopPropagation();
-			var selector = OptimalSelect.select(e.target);
-			self.input.value = selector;
-			self.selectionModeState = false;
-			self.selectionMode.classList.remove('is-active');
-			Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
-				el.removeEventListener('mouseenter', highlightEl);
-				el.removeEventListener('mouseleave', highlightParent);
-				el.removeEventListener('click', chooseEl);
-			});
-
-			selectElements(selector);
-		}
-	}
-
-	this.selectionMode.addEventListener('click', function(e) {
-		this.selectionModeState = !this.selectionModeState;
-		this.selectionMode.classList.toggle('is-active');
-
-		if (this.selectionModeState) {
-			Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
-				el.addEventListener('mouseenter', highlightEl);
-				el.addEventListener('mouseleave', highlightParent);
-				el.addEventListener('click', chooseEl);
-			});
-		}
-		else {
-			Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
-				el.removeEventListener('mouseenter', highlightEl);
-				el.removeEventListener('mouseleave', highlightParent);
-				el.removeEventListener('click', chooseEl);
-			});
-			if (self.elementHighlighted) {
-				self.elementHighlighted.style.outline = 'none';
-				self.elementHighlighted = undefined;
-			}
-		}
-	}.bind(this));
-
-	this.elementAffected = [];
-
-	function selectElements(selector) {
-		Array.prototype.forEach.call(self.elementAffected, function(el) {
-			el.classList.remove('prototypo-selected');
-		});
-		
-		self.elementAffected = document.querySelectorAll(selector);
-		Array.prototype.forEach.call(self.elementAffected, function(el) {
-			el.classList.add('prototypo-selected');
-		});
-	}
-
-	this.input.addEventListener('keyup', function(e) {
-		var selector = e.target.value;
-
-		selectElements(selector);
-	});
-}
-
-SelectorInput.prototype.clear = function() {
-	Array.prototype.forEach.call(this.elementAffected, function(el) {
-		el.classList.remove('prototypo-selected');
-	});
-
-	if (this.elementHighlighted) {
-		this.elementHighlighted.style.outline = 'none';
-	}
-
-	this.input.value = '';
-}
-
-var FontSelect = function(fonts) {
-	this.el = document.createElement('select');
-	this.el.classList.add('prototypo-magic-select');
-
-	fonts.forEach(function(font) {
-
-		font.variants.forEach(function(variant) {
-			var variantOption = document.createElement('option');
-			variantOption.value = variant.db;
-			variantOption.label = font.name + ' ' + variant.name;
-
-			this.el.appendChild(variantOption);
-		}.bind(this));
-	}.bind(this));
-}
-
-var PrototypoError = function(message) {
-	this.el = document.createElement('div');
-	this.el.classList.add('prototypo-magic-error');
-	this.el.innerText = message;
-}
-
 var iframe;
 var error;
+var elementHighlighted;
+// available fonts from prototypo
+var fonts;
+// variable to store current selected font sent from popup
+var selectedFont = '';
+
+// clear previously stored values on page load
+chrome.storage.local.clear();
+
+// setting up the iframe containing protypo app
+var extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
+if (!location.ancestorOrigins.contains(extensionOrigin)) {
+
+	var iframe = document.createElement('iframe');
+	// Must be declared at web_accessible_resources in manifest.json
+	iframe.src = iframeDomain + 'iframe.html';
+
+	// Some styles for a fancy sidebar
+	iframe.style.cssText = 'position:fixed;top:0;left:0;display:block;' +
+	'width:0px;height:0px;border:none;';
+	document.body.appendChild(iframe);
+}
+
+//Here we send a message to the iframe to close the worker port
+window.addEventListener('unload', function() {
+	iframe.post({type: 'close'}, iframeDomain);
+});
+// on element selection start
+window.addEventListener('selection_start', function(e) {
+	// here we store the font that was selected in the popup
+	selectedFont = e.detail.message.font;
+	storeSelectedFont(selectedFont);
+
+	if (e.detail.message.selection) {
+		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+			el.addEventListener('mouseenter', highlightEl);
+			el.addEventListener('mouseleave', highlightParent);
+			el.addEventListener('click', chooseEl);
+		});
+	} else {
+		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+			el.removeEventListener('mouseenter', highlightEl);
+			el.removeEventListener('mouseleave', highlightParent);
+			el.removeEventListener('click', chooseEl);
+		});
+	}
+});
+// on echap, stop selection
+window.addEventListener('keyup', function(e) {
+	if(e.keyCode === 27) {
+		unselectAllElements();
+		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+			el.removeEventListener('mouseenter', highlightEl);
+			el.removeEventListener('mouseleave', highlightParent);
+			el.removeEventListener('click', chooseEl);
+		});
+	}
+});
+
+// on click on popup 'apply' button
+window.addEventListener('apply_style', function(e) {
+	selectedFont = e.detail.message.selectedFont;
+
+	// store relative data
+	storeSelectedFont(selectedFont);
+
+	// apply style to element
+	applyStyleToEl(e.detail.message.selector, selectedFont);
+});
+
+// on keyup in popup selection input
+window.addEventListener('select_elements', function(e) {
+		var highlightedElements = document.querySelectorAll('.prototypo-selected');
+		var elementsToHighlight = document.querySelectorAll(e.detail.message.selector);
+
+		// un-highlight previously highlighted elements
+		Array.prototype.forEach.call(highlightedElements, function(el) {
+			el.classList.remove('prototypo-selected');
+		});
+
+		// highlight concerned elements
+		Array.prototype.forEach.call(elementsToHighlight, function(el) {
+			el.classList.add('prototypo-selected');
+		});
+});
+window.addEventListener('unselect_all_elements',function(e) {
+	var highlightedElements = document.querySelectorAll('.prototypo-highlight');
+	var selectedElements = document.querySelectorAll('.prototypo-selected');
+	var outlinedElements = document.querySelectorAll('.prototypo-outlined');
+
+	// un-highlight previously highlighted elements
+	Array.prototype.forEach.call(highlightedElements, function(el) {
+		el.classList.remove('prototypo-selected');
+	});
+	// un-select previously selected elements
+	Array.prototype.forEach.call(selectedElements, function(item) {
+		item.classList.add('prototypo-highlight');
+	});
+	// un-outline previously outlined elements
+	Array.prototype.forEach.call(outlinedElements, function(el) {
+		el.classList.remove('prototypo-outlined');
+	});
+});
+
+// listening to highlight
+window.addEventListener('highlight_selection', function(e) {
+	var items = document.querySelectorAll(e.detail.message.selector);
+	Array.prototype.forEach.call(items, function(item) {
+		item.classList.add('prototypo-highlight');
+	});
+});
+// listening to unhighlight
+window.addEventListener('unhighlight_selection', function(e) {
+	var items = document.querySelectorAll(e.detail.message.selector);
+	Array.prototype.forEach.call(items, function(item) {
+		item.classList.remove('prototypo-highlight');
+	});
+});
+// listening to style tag removal
+window.addEventListener('remove_style_tag', function(e) {
+	removeStyleTags(e.detail.message.selector);
+});
+// listening to Prototypo app worker messages
 window.addEventListener('message', function(e) {
 	if (!iframe) {
 		iframe = e.source.parent.iframe;
@@ -299,44 +139,218 @@ window.addEventListener('message', function(e) {
 			document.fonts.add(new FontFace(e.data.font[1], e.data.font[0]));
 			break;
 		case 'library':
-			var fonts = e.data;
-			var prototypoButton = new PrototypoMagic(fonts.values);
-			document.body.appendChild(prototypoButton.el);
-			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-				prototypoButton.container.classList.toggle('hidden');
-				prototypoButton.active = !prototypoButton.active;
-				sendResponse({
-					isActive: prototypoButton.active,
-					iconState: prototypoButton.active ? '-hover-active' : ''
-				});
-			}.bind(this));
+			// we store recieved data in a global variable
+			// that will be queried by the popup on load
+			fonts = e.data;
 			break;
 		case 'error':
-			chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-				var prototypoError = error = new PrototypoError(e.data.message);
-				document.body.appendChild(prototypoError.el);
-				sendResponse({
-					isActive: false,
-					iconState: ''
-				});
-			}.bind(this));
+			error = e.data.message;
 			break;
 	}
 }, false);
 
-var extensionOrigin = 'chrome-extension://' + chrome.runtime.id;
-if (!location.ancestorOrigins.contains(extensionOrigin)) {
-	var iframe = document.createElement('iframe');
-	// Must be declared at web_accessible_resources in manifest.json
-	iframe.src = iframeDomain + 'iframe.html';
+/**
+* Highlight a DOM element
+* @param {object} e - the event that called the function
+*/
+function highlightEl(e) {
+	if (elementHighlighted) {
+		if (elementHighlighted.classList) {
+			elementHighlighted.classList.remove('prototypo-outlined');
+		}
+	}
 
-	// Some styles for a fancy sidebar
-	iframe.style.cssText = 'position:fixed;top:0;left:0;display:block;' +
-	'width:0px;height:0px;';
-	document.body.appendChild(iframe);
+	if (e.target.classList) {
+		e.target.classList.add('prototypo-outlined');
+	}
+
+	elementHighlighted = e.target;
 }
 
-//Here we send a message to the iframe to close the worker port
-window.addEventListener('unload', function() {
-	iframe.post({type: 'close'}, iframeDomain);
-});
+/**
+* Highlight a DOM element's parent
+* @param {object} e - the event that called the function
+*/
+function highlightParent(e) {
+	highlightEl({target: e.target.parentNode});
+}
+
+/**
+* Choose a DOM element and store in chrome local data
+* @param {object} e - the event that called the function
+*/
+function chooseEl(e) {
+	if (e.target === e.currentTarget) {
+		e.target.classList.remove('prototypo-outlined');
+		if (e.preventDefault){
+			e.preventDefault();
+		}
+		if (e.stopPropagation) {
+			e.stopPropagation();
+		}
+
+		var selector = OptimalSelect.select(e.target, {
+			ignore: {
+				class: function(className) {
+					return className === "";
+				}
+			}
+		});
+
+		storeElement(selector, selectedFont);
+
+		Array.prototype.forEach.call(document.querySelectorAll('*:not([class*="prototypo-"])'), function(el) {
+			el.removeEventListener('mouseenter', highlightEl);
+			el.removeEventListener('mouseleave', highlightParent);
+			el.removeEventListener('click', chooseEl);
+		});
+
+		// asking iframe worker
+		if (iframe) {
+			var textInSelected = '';
+			// getting every piece of text containing characters to load
+			Array.prototype.forEach.call(document.querySelectorAll(selector), function(el) {
+				textInSelected += el.innerText;
+			});
+			// sending a message to the iframe worker
+			// in order to retrieve every character of selected fonts
+			// will make the iframe worker send a message back
+			iframe.contentWindow.postMessage({type: 'subset', data: textInSelected, add: true},iframeDomain);
+		}
+
+		// apply selected font
+		removeStyleTags(selector);
+		addStyleTag(selector);
+	}
+}
+
+/**
+* Apply a style to a given set of elements
+* @param {string} selector - the selector
+* @param {string} font - the selected font
+*/
+function applyStyleToEl(selector, font) {
+	var elements = document.querySelectorAll(selector);
+
+	Array.prototype.forEach.call(elements, function (element){
+		element.classList.remove('prototypo-outlined');
+		element.classList.remove('prototypo-selected');
+	});
+
+	// asking iframe worker
+	if (iframe) {
+		var textInSelected = '';
+		// getting every piece of text containing characters to load
+		Array.prototype.forEach.call(elements, function(el) {
+			textInSelected += el.innerText;
+		});
+		// sending a message to the iframe worker
+		// in order to retrieve every character of selected fonts
+		// will make the iframe worker send a message back
+		iframe.contentWindow.postMessage({type: 'subset', data: textInSelected, add: true},iframeDomain);
+	}
+
+	// apply selected font
+	removeStyleTags(selector);
+	addStyleTag(selector);
+}
+
+/**
+* Adds a style tag for a selector
+* @param {string} selector - the selector
+*/
+function addStyleTag(selector) {
+	var styleEl = document.createElement('style');
+	var style = selector + ' {font-family: ' + selectedFont + ' !important; transition: background .2s ease, color .2s ease;}';
+	styleEl.setAttribute('data-selector', selector.replace(/ /g,''));
+
+	if (styleEl.stylesheet) {
+		styleEl.stylesheet.cssText = style;
+	} else {
+		styleEl.appendChild(document.createTextNode(style));
+	}
+	document.head.appendChild(styleEl);
+}
+
+/**
+* Removes all style tags for a selector
+* @param {string} selector - the selector
+*/
+function removeStyleTags(selector) {
+	var tags = document.getElementsByTagName('style');
+	var trimedSelector = selector.replace(/ /g,'');
+	var tagsToDelete = [];
+
+	// here we have to loop over the tags and get the attribute 'by hand'
+	// because querySelectorAll will not allow string containing special characters
+	for(var i = 0; i < tags.length; i++) {
+		if (tags[i].getAttribute('data-selector') === trimedSelector) {
+			tagsToDelete.push(tags[i]);
+		}
+	}
+	if (tagsToDelete.length > 0) {
+		for(var i = 0; i < tagsToDelete.length; i++) {
+			document.head.removeChild(tagsToDelete[i]);
+		}
+	}
+}
+
+/**
+*	Stores the selected element in chrome storage
+* @param {string} selector - concerned selector stored as a string
+*/
+
+function storeElement(selector, font) {
+	var isStored = false;
+	chrome.storage.local.get('selectedElements', function(data) {
+		if (data) {
+			if (data.selectedElements) {
+				// look up the array to see if selector is already in
+				data.selectedElements.forEach(function(element) {
+					if (element) {
+						// if the selector was already in the array
+						if(element.selector === selector) {
+							isStored = true;
+							element.font = font;
+						}
+					}
+				});
+				// if the selector was not present, add it
+				if (!isStored) {
+					data.selectedElements.push({ selector: selector, font: font });
+				}
+				chrome.storage.local.set({ selectedElements: data.selectedElements });
+			} else {
+				chrome.storage.local.set({ selectedElements: [{ selector: selector, font: font }] });
+			}
+		}
+		sendMessageToBackground("update_badge_count");
+	});
+}
+
+/**
+*	Stores the selected font in chrome storage
+* @param {string} selectedFont - concerned font stored as a string
+*/
+function storeSelectedFont(selectedFont) {
+	chrome.storage.local.set({selectedFont: selectedFont});
+}
+
+/**
+* A helper function to send a message to the background script
+* @param {string} action - a string representing the action to be sent
+* @param {object} message - a key:value message object
+*/
+function sendMessageToBackground(action, message) {
+	if (typeof action === 'string') {
+		// send a request to the background script
+		chrome.runtime.sendMessage(
+			{
+				action: action,
+				message: message
+			}
+		);
+	} else {
+		throw new Error('sendMessageToBackground - action (first parameter) must be of type string');
+	}
+}

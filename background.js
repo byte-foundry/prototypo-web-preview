@@ -1,32 +1,33 @@
-var activationList = {
-};
+// set the badge background color
+chrome.browserAction.setBadgeBackgroundColor({ color: "#23d390" });
 
-chrome.browserAction.setIcon({ path: 'p-menu.svg' });
+// listening to messages
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	switch (request.action) {
+		// update badge count
+		case "update_badge_count":
+			updateBadgeCount(sender.tab.id);
+			break;
+		default:
+			sendResponse("default response from background (unrecognized request action)");
+	}
+});
 
-chrome.browserAction.onClicked.addListener(function(e) {
-	chrome.tabs.sendMessage(e.id, {activate: true}, function(response) {
-		chrome.browserAction.setIcon({
-			path: 'p-menu' + response.iconState + '.svg',
-		});
 
-		if (response.isActive) {
-			activationList[e.id] = true;
-		}
-		else {
-			activationList[e.id] = false;
+/**
+* Update badge count
+*/
+function updateBadgeCount(tabId) {
+	// set the number of the current tab's badge
+	chrome.storage.local.get('selectedElements', function(data) {
+		if (data) {
+			if (data.selectedElements) {
+				if (data.selectedElements.length > 0) {
+					chrome.browserAction.setBadgeText({ text: (data.selectedElements.length).toString(), tabId: tabId });
+				} else {
+					chrome.browserAction.setBadgeText({ text: '', tabId: tabId });
+				}
+			}
 		}
 	});
-});
-
-chrome.tabs.onActivated.addListener(function(tab) {
-	if (activationList[tab.tabId]) {
-		chrome.browserAction.setIcon({
-			path: 'p-menu-hover-active.svg',
-		});
-	}
-	else {
-		chrome.browserAction.setIcon({
-			path: 'p-menu.svg',
-		});
-	}
-});
+}

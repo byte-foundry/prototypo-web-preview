@@ -63,10 +63,6 @@
 	color: white !important;
 }
 
-.prototypo-outlined {
-	outline: solid 2px #29d390 !important;
-}
-
 .height-out {
 	animation-name: heightout;
 	animation-timing-function: ease;
@@ -136,10 +132,7 @@
 }
 
 .prototypo-magic {
-	position:fixed;
 	z-index:100000000000;
-	bottom:10px;
-	left:10px;
 	font-family: sans-serif;
 }
 
@@ -168,10 +161,6 @@
     align-items: flex-end;
     border-top: solid 6px #24d390;
 	position:relative;
-	animation-name: slidein;
-	animation-timing-function: ease-out;
-	animation-iteration-count: 1;
-	animation-duration: .3s;
 }
 
 .prototypo-magic-select {
@@ -273,11 +262,9 @@
 }
 
 .prototypo-magic-error {
-	position: fixed;
 	background: #fefefe;
-	bottom: 20px;
 	z-index: 99999999999999999;
 	padding: 20px;
-	left: 10px;
-	border-top: solid 4px #23d390;[201~
+	border-top: solid 4px #23d390;
+	min-width: 200px;
 }
