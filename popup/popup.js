@@ -3,6 +3,11 @@ var previouslySelectedFont = '';
 
 // on popup load
 window.addEventListener('load', function() {
+	var port = chrome.runtime.connect({name: "popupConnection"});
+
+	chrome.browserAction.setIcon({
+		path: '../p-menu-hover-active.svg',
+	});
 	// check for Prototypo error
 	chrome.tabs.getSelected(null, function(tab) {
 		chrome.tabs.sendRequest(
