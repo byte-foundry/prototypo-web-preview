@@ -1,5 +1,4 @@
 var iframeDomain = 'http://localhost:9000/';
-var animationDuration = 200;
 var iframe;
 var error;
 var elementHighlighted;
