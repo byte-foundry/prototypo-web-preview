@@ -13,6 +13,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 });
 
+chrome.runtime.onConnect.addListener(function(port) {
+	port.onDisconnect.addListener(function(disconnectedPort) {
+		if (disconnectedPort) {
+			if (disconnectedPort.name === "popupConnection") {
+				chrome.browserAction.setIcon({
+					path: 'p-menu.svg',
+				});
+			}
+		}
+	});
+});
 
 /**
 * Update badge count
