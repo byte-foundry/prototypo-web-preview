@@ -1,22 +1,51 @@
 <!doctype html>
 <html>
 	<head>
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,600" rel="stylesheet">
 		<link href="popup.css" rel="stylesheet" />
 	</head>
 	<body>
+		<div class="prototypo-login">
+			<h1 class="prototypo-login-logo"><img class="prototypo-login-logo-img" src="../p-menu.svg" alt="Prototypo" /></h1>
+			<form class="prototypo-login-form">
+				<p class="prototypo-login-form-error"></p>
+				<input class="prototypo-login-form-email" type="email" placeholder="email@example.com" name="email" required />
+				<input class="prototypo-login-form-password" type="password" placeholder="password" name="password" required />
+				<button type="submit" class="prototypo-login-form-submit">Login</button>
+			</form>
+			<div class="prototypo-login-separator">
+				<hr class="prototypo-login-separator-line" />
+				<div class="prototypo-login-separator-word"><span>OR</span></div>
+			</div>
+			<a class="prototypo-login-create-link" href="https://app.prototypo.io/#/signin" title="Create an account and start making fonts today!">
+				Create an account
+			</a>
+		</div>
 		<div class="prototypo-magic">
-			<div class="prototypo-magic-container">
+			<form class="prototypo-magic-container">
 				<select class="prototypo-magic-select"></select>
 				<div class="prototypo-magic-selector">
 					<div class="prototypo-magic-selection-mode"></div>
 					<input class="prototypo-magic-selector-input" placeholder="Add a CSS selector...">
 				</div>
 				<button class="prototypo-magic-apply">Apply</button>
-			</div>
+			</form>
 			<div class="prototypo-magic-font-list-container">
 				<ul class="prototypo-font-selector-list hidden"></ul>
 			</div>
+			<p class="prototypo-magic-logout">
+				<span class="prototypo-magic-logout-email">email@example.com</span> - 
+				<a class="prototypo-magic-logout-link" href="#">Log out</a>
+			</p>
+			<div class="prototypo-magic-loader">
+				<p class="prototypo-magic-loader-text">Loading...</p>
+			</div>
 		</div>
+		<div class="prototypo-loader">
+			<p class="prototypo-loader-text">Loading...</p>
+		</div>
+		<script src="main.js"></script>
 		<script src="popup.js"></script>
+		<script src="LoginForm.js"></script>
 	</body>
 </html>

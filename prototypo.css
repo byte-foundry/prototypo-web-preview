@@ -1,283 +1,305 @@
 @keyframes slidein {
-	0% {
-		left: -250px;
-	}
+  0% {
+    left: -250px;
+  }
 
-	100% {
-		left: 0px;
-	}
+  100% {
+    left: 0px;
+  }
 }
 
 @keyframes slideout {
-	0% {
-		left: 0px;
-	}
+  0% {
+    left: 0px;
+  }
 
-	100% {
-		left: -250px;
-	}
+  100% {
+    left: -250px;
+  }
 }
 
 @keyframes scalein {
-	0% {
-		transform: scaleX(0) scaleY(0);
-	}
+  0% {
+    transform: scaleX(0) scaleY(0);
+  }
 
-	100% {
-		transform: scaleX(1) scaleY(1);
-	}
+  100% {
+    transform: scaleX(1) scaleY(1);
+  }
 }
 
 @keyframes scaleout {
-	0% {
-		transform: scaleX(1) scaleY(1);
-	}
+  0% {
+    transform: scaleX(1) scaleY(1);
+  }
 
-	100% {
-		transform: scaleX(0) scaleY(0);
-	}
+  100% {
+    transform: scaleX(0) scaleY(0);
+  }
 }
 
 @keyframes heightin {
-	0% {
-		height: 0;
-	}
+  0% {
+    height: 0;
+  }
 
-	100% {
-		height: 76px;
-	}
+  100% {
+    height: 76px;
+  }
 }
 
 @keyframes heightout {
-	0% {
-		height: 76px;
-	}
+  0% {
+    height: 76px;
+  }
 
-	100% {
-		height: 0;
-	}
+  100% {
+    height: 0;
+  }
 }
 
 .prototypo-highlight {
-	background:#23d390 !important;
-	color: white !important;
+  background: #23d390 !important;
+  color: white !important;
 }
 
 .prototypo-outlined {
-	outline: solid 2px #29d390 !important;
+  outline: solid 2px #29d390 !important;
+}
+
+.prototypo-font-loader {
+  outline: solid 2px #999 !important;
+  position: absolute;
+  z-index: 10000000;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.prototypo-font-loader div {
+  background-image: url('chrome-extension://__MSG_@@extension_id__/loader.svg'),
+    url('moz-extensions://__MSG_@@extension_id__/loader.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  position: absolute;
+  top: 10%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 75%;
 }
 
 .height-out {
-	animation-name: heightout;
-	animation-timing-function: ease;
-	animation-iteration-count: 1;
-	animation-duration: .2s;
+  animation-name: heightout;
+  animation-timing-function: ease;
+  animation-iteration-count: 1;
+  animation-duration: 0.2s;
 }
 
 .height-in {
-	animation-name: heightin;
-	animation-timing-function: ease;
-	animation-iteration-count: 1;
-	animation-duration: .2s;
+  animation-name: heightin;
+  animation-timing-function: ease;
+  animation-iteration-count: 1;
+  animation-duration: 0.2s;
 }
 
 .scale-in {
-	animation-name: scalein;
-	animation-timing-function: ease-out;
-	animation-iteration-count: 1;
-	animation-duration: .2s;
+  animation-name: scalein;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+  animation-duration: 0.2s;
 }
 
 .scale-out {
-	animation-name: scaleout;
-	animation-timing-function: ease-in;
-	animation-iteration-count: 1;
-	animation-duration: .2s;
+  animation-name: scaleout;
+  animation-timing-function: ease-in;
+  animation-iteration-count: 1;
+  animation-duration: 0.2s;
 }
 
 .prototypo-magic-font-list-container {
-	position:relative !important;
+  position: relative !important;
 }
 
 .prototypo-selected {
-	outline: solid 1px #24d390 !important;
+  outline: solid 1px #24d390 !important;
 }
 
 .slide-in-list {
-	animation-name: slidein;
-	animation-timing-function: ease-out;
-	animation-iteration-count: 1;
-	animation-duration: .3s;
+  animation-name: slidein;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+  animation-duration: 0.3s;
 }
 
 .slide-out-list {
-	animation-name: slideout;
-	animation-timing-function: ease-in;
-	animation-iteration-count: 1;
-	animation-duration: .3s;
+  animation-name: slideout;
+  animation-timing-function: ease-in;
+  animation-iteration-count: 1;
+  animation-duration: 0.3s;
 }
 
 .prototypo-magic-button {
-	background-color: #111;
-	border-radius: 50%;
-	width: 50px;
-	height:50px;
-	color:#fff;
-	font-size:32px;
-	font-family: sans-serif;
-	text-align:center;
-	box-sizing:border-box;
-	padding-top:3px;
-	font-style:italic;
+  background-color: #111;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  color: #fff;
+  font-size: 32px;
+  font-family: sans-serif;
+  text-align: center;
+  box-sizing: border-box;
+  padding-top: 3px;
+  font-style: italic;
 }
 
 .prototypo-magic .hidden {
-	display:none;
+  display: none;
 }
 
 .prototypo-magic {
-	position:fixed;
-	z-index:100000000000;
-	bottom:10px;
-	left:10px;
-	font-family: sans-serif;
+  position: fixed;
+  z-index: 100000000000;
+  bottom: 10px;
+  left: 10px;
+  font-family: sans-serif;
 }
 
 .prototypo-magic-selector {
-	position:relative;
-	padding-bottom:5px;
-	width:100%;
-	display:block;
+  position: relative;
+  padding-bottom: 5px;
+  width: 100%;
+  display: block;
 }
 
 .prototypo-magic-selector input {
-	width:100%;
-	border-radius: 0;
-    box-sizing: border-box;
-	height: 32px;
-    padding: 4px;
+  width: 100%;
+  border-radius: 0;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 4px;
 }
 
 .prototypo-magic-container {
-	background:white;
-	padding:10px;
-	border-radius: 0;
-    width: 240px;
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: flex-end;
-    border-top: solid 6px #24d390;
-	position:relative;
-	animation-name: slidein;
-	animation-timing-function: ease-out;
-	animation-iteration-count: 1;
-	animation-duration: .3s;
+  background: white;
+  padding: 10px;
+  border-radius: 0;
+  width: 240px;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
+  border-top: solid 6px #24d390;
+  position: relative;
+  animation-name: slidein;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+  animation-duration: 0.3s;
 }
 
 .prototypo-magic-select {
-	margin-bottom:5px;
-	width: 100%;
-	height: 32px;
-	background: #f6f6f6;
-	border: none;
-	text-transform: capitalize;
+  margin-bottom: 5px;
+  width: 100%;
+  height: 32px;
+  background: #f6f6f6;
+  border: none;
+  text-transform: capitalize;
 }
 
 .prototypo-font-selector-list {
-	list-style-type:none;
-	padding:5px 10px 10px 10px;
-	margin:0 0 3px 0;
-	border-top: solid 6px #24d390;
-	background: white;
+  list-style-type: none;
+  padding: 5px 10px 10px 10px;
+  margin: 0 0 3px 0;
+  border-top: solid 6px #24d390;
+  background: white;
 }
 
 .prototypo-magic-apply {
-	padding: 5px 20px;
-	color: #24d390;
-	font-weight: 900;
-	font-family: sans-serif;
-	background: transparent;
-	border-color: #24d390;
-	border: solid 2px;
+  padding: 5px 20px;
+  color: #24d390;
+  font-weight: 900;
+  font-family: sans-serif;
+  background: transparent;
+  border-color: #24d390;
+  border: solid 2px;
 }
 
 .prototypo-magic-apply:hover {
-	background: #24d390;
-	color: white;
-	border-color: #24d390;
-	border: solid 2px;
+  background: #24d390;
+  color: white;
+  border-color: #24d390;
+  border: solid 2px;
 }
 
 .prototypo-font-selector-list li {
-	background: #24d390;
-	margin-top: 5px;
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	flex-flow: column nowrap;
+  background: #24d390;
+  margin-top: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-flow: column nowrap;
 }
 
 .prototypo-list-selector-container {
-	padding:10px;
-	background:rgb(105, 217, 174);
-	font-weight:900;
-	box-sizing:border-box;
-	width:100%;
-	display:flex;
-	justify-content:space-between;
+  padding: 10px;
+  background: rgb(105, 217, 174);
+  font-weight: 900;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .prototypo-list-selector-delete {
-	width:14px;
-	height:14px;
-	cursor: pointer;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
 }
 
 .prototypo-list-fontname-container {
-	padding:10px;
-	width:100%;
-	background:rgb(193, 248, 227);
-	box-sizing:border-box;
+  padding: 10px;
+  width: 100%;
+  background: rgb(193, 248, 227);
+  box-sizing: border-box;
 }
 
 .prototypo-magic-selection-mode {
-	width: 23px;
-	height: 23px;
-	position: absolute;
-	right: 3px;
-	box-sizing: border-box;
-	top: 3px;
-	background-repeat: no-repeat;
-	background-position: 3px;
-	cursor:pointer;
-	background-image: url(chrome-extension://__MSG_@@extension_id__/selector.svg);
+  width: 23px;
+  height: 23px;
+  position: absolute;
+  right: 3px;
+  box-sizing: border-box;
+  top: 3px;
+  background-repeat: no-repeat;
+  background-position: 3px;
+  cursor: pointer;
+  background-image: url(chrome-extension://__MSG_@@extension_id__/selector.svg);
 }
 
-.prototypo-magic-selection-mode:hover, .prototypo-magic-selection-mode.is-active {
-	background-image: url(chrome-extension://__MSG_@@extension_id__/selector-hover-active.svg);
+.prototypo-magic-selection-mode:hover,
+.prototypo-magic-selection-mode.is-active {
+  background-image: url(chrome-extension://__MSG_@@extension_id__/selector-hover-active.svg);
 }
 
 .prototypo-magic-selector-input {
-	padding-right: 30px;
+  padding-right: 30px;
 }
 
 .prototypo-magic-selector-input.in-error {
-	border: solid 1px #f96752;
+  border: solid 1px #f96752;
 }
 
 .prototypo-list-selector-name {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	width: 186px;
-	white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 186px;
+  white-space: nowrap;
 }
 
 .prototypo-magic-error {
-	position: fixed;
-	background: #fefefe;
-	bottom: 20px;
-	z-index: 99999999999999999;
-	padding: 20px;
-	left: 10px;
-	border-top: solid 4px #23d390;[201~
+  position: fixed;
+  background: #fefefe;
+  bottom: 20px;
+  z-index: 99999999999999999;
+  padding: 20px;
+  left: 10px;
+  border-top: solid 4px #23d390;
 }
