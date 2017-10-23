@@ -68,15 +68,15 @@
 }
 
 .prototypo-font-loader {
-  outline: solid 2px #999 !important;
+  outline: solid 2px #24d390 !important;
   position: absolute;
-  z-index: 10000000;
-  background: rgba(0, 0, 0, 0.2);
+  z-index: 10000000000;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .prototypo-font-loader div {
   background-image: url('chrome-extension://__MSG_@@extension_id__/loader.svg'),
-    url('moz-extensions://__MSG_@@extension_id__/loader.svg');
+    url('moz-extension://__MSG_@@extension_id__/loader.svg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;

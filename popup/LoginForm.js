@@ -1,11 +1,23 @@
 window.addEventListener('load', () => {
   const form = document.querySelector('.prototypo-login-form');
+  const submitButton = document.querySelector('.prototypo-login-form-submit');
   const errorElement = document.querySelector('.prototypo-login-form-error');
 
-  const render = ({ error }) => {
-    errorElement.innerText = '';
+  const initialSubmitText = submitButton.innerHTML;
 
-    if (error) {
+  const render = ({ loading, error }) => {
+    errorElement.innerText = '';
+    submitButton.removeAttribute('disabled');
+    submitButton.classList.remove('prototypo-login-form-submit--loading');
+    submitButton.innerHTML = initialSubmitText;
+
+    if (loading) {
+      submitButton.setAttribute('disabled', true);
+      submitButton.classList.add('prototypo-login-form-submit--loading');
+      submitButton.innerHTML = '&nbsp;';
+    }
+
+    if (!loading && error) {
       errorElement.innerText = error;
     }
   };
@@ -19,8 +31,6 @@ window.addEventListener('load', () => {
 
     const email = e.target.email.value;
     const password = e.target.password.value;
-
-    console.log('loading', email, password);
 
     const query = `
       mutation {
@@ -50,5 +60,7 @@ window.addEventListener('load', () => {
     }
 
     chrome.storage.local.set({ token: data.data.authenticateEmailUser.token });
+
+    render({ loading: false });
   });
 });

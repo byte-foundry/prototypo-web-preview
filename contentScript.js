@@ -126,7 +126,6 @@ window.addEventListener(
         fonts = e.data;
         break;
       case 'error':
-        console.log('receiving error', e.data);
         error = e.data.message;
         break;
     }
@@ -226,6 +225,8 @@ function addStyleTag(selector) {
   var style = `
     ${selector} {
       font-family: "${selectedFont}" !important;
+      font-style: normal !important;
+      font-weight: normal !important;
       transition: background .2s ease, color .2s ease;
     }
   `;
@@ -251,8 +252,8 @@ function addStyleTag(selector) {
       loader.setAttribute('data-font', selectedFont);
 
       const position = node.getBoundingClientRect();
-      loader.style.top = position.top + 'px';
-      loader.style.left = position.left + 'px';
+      loader.style.top = window.scrollY + position.top + 'px';
+      loader.style.left = window.scrollX + position.left + 'px';
       loader.style.width = position.width + 'px';
       loader.style.height = position.height + 'px';
 

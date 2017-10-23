@@ -26,7 +26,6 @@ function displayFontList(fonts) {
 function getLibrary() {
   // We get the user library from the storage and listen for changes
   chrome.storage.local.get('user', ({ user }) => {
-    console.log('got result', user);
     if (user) {
       displayFontList(user.library);
     }
@@ -50,7 +49,6 @@ window.addEventListener('load', function() {
       },
       // response function containing data sent by content script
       function(error) {
-        console.log('get error', error);
         if (error) {
           var prototypoError = new PrototypoError(error);
           while (document.body.firstChild) {
@@ -252,7 +250,10 @@ var PrototypoMagic = function(fonts) {
           selector: input.value,
           selectedFont: this.fontSelect.el.value,
         });
-        storeSelectedFont({id: this.fontSelect.el[this.fontSelect.el.selectedIndex].id, name: this.fontSelect.el.value});
+        storeSelectedFont({
+          id: this.fontSelect.el[this.fontSelect.el.selectedIndex].id,
+          name: this.fontSelect.el.value,
+        });
 
         // update existing selector if already existing
         if (this.listFontSelector.list[input.value]) {
@@ -316,7 +317,10 @@ var SelectorInput = function() {
       selection: selection,
       font: selectedFontOption.value,
     });
-    storeSelectedFont({id: selectedFontOption[selectedFontOption.selectedIndex].id, name: selectedFontOption.value})
+    storeSelectedFont({
+      id: selectedFontOption[selectedFontOption.selectedIndex].id,
+      name: selectedFontOption.value,
+    });
     // then close the popup
     window.close(); // idealement ici faire ça en callback apres reponse du contentScript
   }
@@ -362,7 +366,7 @@ var FontSelect = function(fonts) {
   // select previously selected font if necessary
   if (previouslySelectedFont !== '') {
     var options = document.querySelectorAll('.prototypo-magic-select option');
-    Array.prototype.forEach.call(options, (option) => {
+    Array.prototype.forEach.call(options, option => {
       if (option.value === previouslySelectedFont.name) {
         option.selected = true;
       }
@@ -475,13 +479,16 @@ window.addEventListener('load', () => {
 
   // init
 
-  logoutLink.addEventListener('click', (e) => {
+  logoutLink.addEventListener('click', e => {
     e.preventDefault();
 
     chrome.storage.local.remove('token');
   });
 
-  chrome.storage.local.get({user: {email: 'email@example.com'}}, ({user: {email}}) => {
-    render({email});
-  });
+  chrome.storage.local.get(
+    { user: { email: 'email@example.com' } },
+    ({ user: { email } }) => {
+      render({ email });
+    },
+  );
 });

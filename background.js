@@ -1,8 +1,6 @@
 // set the badge background color
 chrome.browserAction.setBadgeBackgroundColor({ color: '#23d390' });
 
-chrome.browserAction.onClicked.addListener(function(tab) { alert('icon clicked')});
-
 // listening to messages
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   switch (request.action) {
