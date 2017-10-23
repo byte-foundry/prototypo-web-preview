@@ -324,6 +324,11 @@ body {
   justify-content: center;
 }
 
+.prototypo-magic-loader, .prototypo-loader {
+  margin: auto;
+  text-align: center;
+}
+
 .prototypo-magic-logout {
   text-align: center;
   font-size: 9px;

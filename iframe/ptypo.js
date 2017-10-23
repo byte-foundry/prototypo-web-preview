@@ -1045,11 +1045,11 @@ var templateNames = exports.templateNames = {
 	ELZEVIR: 'elzevir.ptf',
 	GROTESK: 'venus.ptf',
 	FELL: 'john-fell.ptf',
-	SPECTRAL: 'spectral.ptf',
+	SPECTRAL: 'gfnt.ptf',
 	ANTIQUE: 'antique.ptf'
 };
 
-var validTemplates = ['elzevir.ptf', 'venus.ptf', 'john-fell.ptf', 'spectral.ptf', 'antique.ptf'];
+var validTemplates = ['elzevir.ptf', 'venus.ptf', 'john-fell.ptf', 'gfnt.ptf', 'antique.ptf'];
 
 var PtypoWorker = __webpack_require__(107);
 
@@ -1064,7 +1064,7 @@ var Ptypo = function () {
 	(0, _createClass3.default)(Ptypo, [{
 		key: "createFont",
 		value: function createFont(fontName, fontTemplate) {
-			var font, data, json, worker;
+			var data, font, json, worker;
 			return _regenerator2.default.async(function createFont$(_context) {
 				while (1) {
 					switch (_context.prev = _context.next) {
@@ -1086,13 +1086,28 @@ var Ptypo = function () {
 							}));
 
 						case 4:
-							font = _context.sent;
-							_context.next = 7;
-							return _regenerator2.default.awrap(font.json());
+							data = _context.sent;
+
+							if (!(!data.ok && data.statusCode === 403)) {
+								_context.next = 7;
+								break;
+							}
+
+							throw new Error("\n\t\t\t\tThe domain from where you're using the Prototypo library is not authorized.\n\t\t\t\tYou can manage authorized domains in the developers page on your account.\n\t\t\t\tSee https://app.prototypo.io/#/account/prototypo-library\n\t\t\t");
 
 						case 7:
-							data = _context.sent;
-							json = JSON.parse(data);
+							_context.next = 9;
+							return _regenerator2.default.awrap(data.json());
+
+						case 9:
+							font = _context.sent;
+							json = JSON.parse(font);
+
+
+							if (!this.token /*|| TODO: check if AWS returned a free font */) {
+									console.warn("\n\t\t\t\tYou're using the free version of the Prototypo library.\n\t\t\t\tGet a pro account now and access the entire glyphset\n\t\t\t\thttps://app.prototypo.io/#/account/subscribe\n\t\t\t");
+								}
+
 							worker = new PtypoWorker();
 							return _context.abrupt("return", new _promise2.default(function (resolve, reject) {
 								var loadFontHandler = function loadFontHandler(e) {
@@ -1113,11 +1128,11 @@ var Ptypo = function () {
 								worker.postMessage({
 									type: 'font',
 									name: fontName,
-									data: data
+									data: font
 								});
 							}));
 
-						case 11:
+						case 14:
 						case "end":
 							return _context.stop();
 					}
