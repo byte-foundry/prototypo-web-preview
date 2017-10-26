@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "prettier": "1.7.4",
+    "serve": "^6.2.0",
+    "web-ext": "^2.2.2"
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "scripts": {
+    "start": "serve ./iframe",
+    "prettier": "prettier *.{js,css,json}"
+  }
+}

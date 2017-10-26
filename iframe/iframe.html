@@ -1,0 +1,23 @@
+<script src="ptypo.js"></script>
+<script>
+  const ptypoFactory = new Ptypo.default();
+  const fonts = {};
+
+  window.addEventListener('message', async (event) => {
+    const font = event.data;
+    // Receiving message from the background script
+    // we have to cache the font or reuse it otherwise
+
+    if (!fonts[font.id]) {
+      fonts[font.id] = await ptypoFactory.createFont(font.name, font.template);
+    }
+
+    // waiting for the font to be built
+    await fonts[font.id].changeParams(font.values);
+
+    event.source.postMessage({
+      ...font,
+      source: fonts[font.id].otfSource,
+    }, event.origin);
+  });
+</script>
