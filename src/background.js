@@ -97,7 +97,7 @@ const wsClient = new SubscriptionsTransportWs.SubscriptionClient(
   },
 );
 
-function loadAndConnect() {
+function loadAndConnect(retry) {
   chrome.storage.local.get('token', async ({ token }) => {
     if (!token) {
       return;
@@ -136,9 +136,9 @@ function loadAndConnect() {
     const data = await response.json();
     const { data: { user }, errors } = data;
 
-    if (errors) {
-      console.error('Login error. What should we do?');
-      return;
+    if ((!user || errors) && !retry) {
+      chrome.storage.local.set({ token: null });
+      return loadAndConnect(true);
     }
 
     // const gqlClient = new GraphQLClient('https://api.graph.cool/simple/v1/prototypo-new-dev', {
