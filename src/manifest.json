@@ -3,8 +3,8 @@
 
 	"name": "Prototypo Web Preview",
 	"description": "This extension allows you to use and synchronize font you create with Prototypo directly on your web site",
-	"version_name": "2.0.0",
-	"version": "2.0.0",
+	"version_name": "2.0.1",
+	"version": "2.0.1",
 
 	"browser_action": {
 		"default_icon": "p-menu.png",
