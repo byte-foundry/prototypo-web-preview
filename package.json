@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "prettier": "1.7.4",
-    "serve": "^6.2.0",
+    "serve": "^10.1.2",
     "web-ext": "^2.2.2"
   },
   "prettier": {
